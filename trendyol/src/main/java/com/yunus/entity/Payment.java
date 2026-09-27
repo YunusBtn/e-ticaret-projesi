@@ -33,7 +33,6 @@ public class Payment {
     @Column(nullable = false)
     private PaymentMethod method;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus status;
