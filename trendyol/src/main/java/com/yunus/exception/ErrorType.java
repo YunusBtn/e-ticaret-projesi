@@ -22,5 +22,4 @@ public enum ErrorType {
         this.status = status;
     }
 
-
 }
