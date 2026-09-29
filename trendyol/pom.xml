@@ -28,7 +28,14 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <!-- MapStruct versiyonunu tek yerde tutuyoruz ki dependency ve
+             annotation processor path'i birbirinden asla sapmasın -->
+        <org.mapstruct.version>1.6.3</org.mapstruct.version>
+        <!-- Lombok + MapStruct birlikte kullanılırken gereken köprü kütüphanenin
+             versiyonu da burada, aynı sebeple -->
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -40,7 +47,15 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <!-- "spring-boot-starter-webmvc" yerine doğrusu bu -->
+        </dependency>
+
+        <!-- MapStruct'ın kendisi: runtime'da mapper'ların çalışması için gereken çekirdek kütüphane -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${org.mapstruct.version}</version>
         </dependency>
 
         <dependency>
@@ -53,19 +68,11 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- Test desteği: JUnit, Mockito, AssertJ, MockMvc hepsi tek starter'da gelir -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -92,6 +99,21 @@
                                     <groupId>org.projectlombok</groupId>
                                     <artifactId>lombok</artifactId>
                                 </path>
+                                <!-- MapStruct'ın mapper implementasyonlarını üreten asıl işlemci -->
+                                <path>
+                                    <groupId>org.mapstruct</groupId>
+                                    <artifactId>mapstruct-processor</artifactId>
+                                    <version>${org.mapstruct.version}</version>
+                                </path>
+                                <!-- Lombok'un getter/setter'ları MapStruct çalışırken henüz "görünür"
+                                     olmayabilir (ikisi de aynı derleme aşamasında çalışıyor) —
+                                     bu köprü, iki processor'ın doğru sırayla çalışmasını garanti eder.
+                                     Bu satır olmadan mapper metodları boş/null dönebilir. -->
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok-mapstruct-binding</artifactId>
+                                    <version>${lombok-mapstruct-binding.version}</version>
+                                </path>
                             </annotationProcessorPaths>
                         </configuration>
                     </execution>
@@ -106,6 +128,19 @@
                                 <path>
                                     <groupId>org.projectlombok</groupId>
                                     <artifactId>lombok</artifactId>
+                                </path>
+                                <!-- Test kaynaklarında da mapper/DTO kullanabilmen için
+                                     (örn. mapper birim testleri yazarsan) aynı üçlüyü
+                                     buraya da ekliyoruz -->
+                                <path>
+                                    <groupId>org.mapstruct</groupId>
+                                    <artifactId>mapstruct-processor</artifactId>
+                                    <version>${org.mapstruct.version}</version>
+                                </path>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok-mapstruct-binding</artifactId>
+                                    <version>${lombok-mapstruct-binding.version}</version>
                                 </path>
                             </annotationProcessorPaths>
                         </configuration>
