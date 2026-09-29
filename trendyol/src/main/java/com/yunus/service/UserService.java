@@ -1,14 +1,16 @@
 package com.yunus.service;
 
+import com.yunus.dto.user.UserCreateRequest;
+import com.yunus.dto.user.UserResponse;
 import com.yunus.entity.User;
 
 import java.util.List;
 
 public interface UserService {
-    User createUser(User user);
-    User getUserById(Long id);
-    List<User> getAllUsers();
-    User updateUser(Long id,User updatedUser);
+    UserResponse createUser(UserCreateRequest request);
+    UserResponse getUserById(Long id);
+    List<UserResponse> getAllUsers();
+    UserResponse updateUser(Long id,UserCreateRequest request);
     void deleteUser(Long id);
 
 
