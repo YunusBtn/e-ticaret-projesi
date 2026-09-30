@@ -12,7 +12,6 @@ import com.yunus.exception.BusinessException;
 import com.yunus.exception.ErrorType;
 import com.yunus.mapper.OrderMapper;
 import com.yunus.repository.OrderRepository;
-import com.yunus.repository.ProductRepository;
 import com.yunus.repository.UserRepository;
 import com.yunus.service.OrderService;
 import com.yunus.service.ProductService;
@@ -76,22 +75,37 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderResponse getOrderById(Long id) {
-        return null;
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Sipariş Bulunamadı"));
+
+        return orderMapper.toResponse(order);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersByUser(Long userId) {
-        return List.of();
+        return orderRepository.findByUserId(userId)
+                .stream()
+                .map(orderMapper::toResponse)
+                .toList();
+
     }
 
     @Override
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus) {
-        return null;
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Sipariş bulunamadı"));
+        order.setStatus(newStatus);
+        Order updated = orderRepository.save(order);
+        return orderMapper.toResponse(updated);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Order getOrderEntityById(Long id) {
-        return null;
+        return orderRepository.findById(id)
+                .orElseThrow(()-> new BusinessException(ErrorType.NOT_FOUND, "Sipariş bulunamadı"));
     }
 }
