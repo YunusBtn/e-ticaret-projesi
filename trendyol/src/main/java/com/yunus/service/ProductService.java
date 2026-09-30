@@ -17,5 +17,4 @@ public interface ProductService {
 
     void deleteProduct(Long id);
 
-    Product decreaseStockAndGetProduct(Long productId, int quantity);
 }
