@@ -1,5 +1,5 @@
 package com.yunus.enums;
 
 public enum Role {
-    ADMIN
+    ADMIN, USER
 }

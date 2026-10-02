@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "username" + request.getUsername());
         }
         User user = userMapper.toEntity(request);
-        user.setRole(Role.USER);
+        user.setRole(request.getRole() != null ? request.getRole() : Role.USER);
         User savedUser = userRepository.save(user);
 
         return userMapper.toResponse(savedUser);
