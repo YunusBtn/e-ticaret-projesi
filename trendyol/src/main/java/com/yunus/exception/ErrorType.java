@@ -11,8 +11,9 @@ public enum ErrorType {
     INSUFFICIENT_STOCK("Yetersiz stok", HttpStatus.CONFLICT),
     INVALID_PAYMENT("Geçersiz ödeme", HttpStatus.BAD_REQUEST),
     VALIDATION_ERROR("Geçersiz veri", HttpStatus.BAD_REQUEST),
-    INTERNAL_ERROR("Beklenmeyen bir hata oluştu", HttpStatus.INTERNAL_SERVER_ERROR);
-
+    INTERNAL_ERROR("Beklenmeyen bir hata oluştu", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_CREDENTIALS("Geçersiz Kimlik Bilgileri", HttpStatus.UNAUTHORIZED),
+    ACCESS_DENIED("Erişim Yetkisi Yok", HttpStatus.FORBIDDEN);
 
     private final String message;
     private final HttpStatus status;
