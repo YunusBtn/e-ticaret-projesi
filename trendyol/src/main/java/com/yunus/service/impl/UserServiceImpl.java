@@ -74,6 +74,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Silinmek istenen Kullanıcı Bulunamadı"));
         userRepository.delete(user);
-
+        System.out.println();
     }
 }

@@ -35,12 +35,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleAuthFailure(Exception ex, HttpServletRequest request) {
-        log.info("Giriş Denemesi Başarısız : ", request.getRequestURI(), ex.getMessage());
-        return buildResponse(ErrorType.INVALID_CREDENTIALS.getStatus(), ex.getMessage(), request);
+        log.info("Giriş Denemesi Başarısız : {} - {}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(ErrorType.INVALID_CREDENTIALS.getStatus(),ErrorType.INVALID_CREDENTIALS.getMessage(), request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        log.info("Giriş Denemesi Başarısız : ", request.getRequestURI(), ex.getMessage());
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request);
     }
 
