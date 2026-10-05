@@ -11,6 +11,7 @@ import com.yunus.mapper.UserMapper;
 import com.yunus.repository.UserRepository;
 import com.yunus.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponse createUser(UserCreateRequest request) {
@@ -31,6 +33,9 @@ public class UserServiceImpl implements UserService {
         }
         User user = userMapper.toEntity(request);
         user.setRole(request.getRole() != null ? request.getRole() : Role.USER);
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         User savedUser = userRepository.save(user);
 
         return userMapper.toResponse(savedUser);
