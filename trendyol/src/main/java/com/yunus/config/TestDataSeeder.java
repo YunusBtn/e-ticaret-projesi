@@ -94,6 +94,10 @@ public class TestDataSeeder implements CommandLineRunner {
 
             users.add(
                     User.builder()
+                            .createdAt(LocalDateTime
+                                    .now()
+                                    .minusDays(random.nextInt(0, 365))
+                                    .minusMinutes(random.nextInt(0, 1440)))
                             .username(username)
                             .email(username + "@example.com")
                             .password(hashedPassword)
@@ -115,6 +119,10 @@ public class TestDataSeeder implements CommandLineRunner {
 
             products.add(
                     Product.builder()
+                            .createdAt(LocalDateTime
+                                    .now()
+                                    .minusDays(random.nextInt(0, 365))
+                                    .minusMinutes(random.nextInt(0, 1440)))
                             .name(name)
                             .description("Test ürünü: " + name)
                             .price(BigDecimal.valueOf(
