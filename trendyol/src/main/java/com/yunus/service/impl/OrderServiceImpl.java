@@ -86,6 +86,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersByUser(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new BusinessException(ErrorType.NOT_FOUND,"Kullanıcı Bulunamadı"));
+
         return orderRepository.findByUserId(userId)
                 .stream()
                 .map(orderMapper::toResponse)
