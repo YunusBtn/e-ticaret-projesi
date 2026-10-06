@@ -37,6 +37,7 @@ public class UserController {
 
 
     @PutMapping("/update/{id}")
+    @PreAuthorize( "hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateUser( @Valid @PathVariable Long id, @RequestBody UserCreateRequest request) {
         UserResponse response = userService.updateUser(id, request);
         return ResponseEntity.ok(response);
