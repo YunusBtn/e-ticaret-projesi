@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -31,6 +32,13 @@ public class GlobalExceptionHandler {
         log.error("Beklenmeyen hata oluştu: {}", request.getRequestURI(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ErrorType.INTERNAL_ERROR.getMessage(), request);
     }
+
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        return buildResponse(ErrorType.VALIDATION_ERROR.getStatus(), "Geçersiz parametre değeri : " +ex.getName(), request);
+    }
+
 
 
     @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
