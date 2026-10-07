@@ -1,5 +1,6 @@
 package com.yunus.service.impl;
 
+import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.order.OrderItemRequest;
 import com.yunus.dto.order.OrderRequest;
 import com.yunus.dto.order.OrderResponse;
@@ -15,16 +16,21 @@ import com.yunus.repository.OrderRepository;
 import com.yunus.repository.UserRepository;
 import com.yunus.service.OrderService;
 import com.yunus.service.ProductService;
+import com.yunus.util.PageableValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+
+    private static final Set<String> ORDER_SORT_FIELDS = Set.of("id", "status", "totalPrice", "createdAt");
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
@@ -85,17 +91,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderResponse> getOrdersByUser(Long userId) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(()-> new BusinessException(ErrorType.NOT_FOUND,"Kullanıcı Bulunamadı"));
-
-        return orderRepository.findByUserId(userId)
-                .stream()
-                .map(orderMapper::toResponse)
-                .toList();
-
+    public PageResponse<OrderResponse> getOrdersByUser(Long userId, Pageable pageable) {
+        PageableValidator.validateSort(pageable, ORDER_SORT_FIELDS);
+        return PageResponse.from(orderRepository.findByUserId(userId, pageable).map(orderMapper::toResponse));
     }
+
 
     @Override
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus) {
@@ -111,5 +111,12 @@ public class OrderServiceImpl implements OrderService {
     public Order getOrderEntityById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(()-> new BusinessException(ErrorType.NOT_FOUND, "Sipariş bulunamadı"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getAllOrders(Pageable pageable) {
+        PageableValidator.validateSort(pageable, ORDER_SORT_FIELDS);
+        return PageResponse.from(orderRepository.findAll(pageable).map(orderMapper::toResponse));
     }
 }

@@ -1,5 +1,6 @@
 package com.yunus.service.impl;
 
+import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.product.ProductRequest;
 import com.yunus.dto.product.ProductResponse;
 import com.yunus.entity.Product;
@@ -8,15 +9,22 @@ import com.yunus.exception.ErrorType;
 import com.yunus.mapper.ProductMapper;
 import com.yunus.repository.ProductRepository;
 import com.yunus.service.ProductService;
+import com.yunus.util.PageableValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
+
+    private static  final Set<String> DEFAULT_SORT_FIELD = Set.of("id", "name", "price", "stockQuantity", "createdAt");
+
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
@@ -39,11 +47,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll()
-                .stream()
-                .map(productMapper::toResponse)
-                .toList();
+    public PageResponse<ProductResponse> getAllProducts(String name, Pageable pageable) {
+        PageableValidator.validateSort(pageable,DEFAULT_SORT_FIELD);
+
+        Page<Product> products = (name == null || name.isBlank())
+                ? productRepository.findAll(pageable)
+                : productRepository.findByNameContainingIgnoreCase(name, pageable);
+
+        return PageResponse.from(products.map(productMapper::toResponse));
     }
 
     @Override

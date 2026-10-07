@@ -7,8 +7,6 @@ import com.yunus.entity.Order;
 import com.yunus.enums.OrderStatus;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
 public interface OrderService {
     OrderResponse createOrder(OrderRequest request);
 
