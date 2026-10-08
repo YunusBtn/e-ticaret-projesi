@@ -1,10 +1,14 @@
 package com.yunus.controller;
 
+import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.product.ProductRequest;
 import com.yunus.dto.product.ProductResponse;
 import com.yunus.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +34,10 @@ public class ProductController {
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<ProductResponse>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<PageResponse<ProductResponse>> getAllProducts(
+            @RequestParam(required = false) String name,
+            @ParameterObject @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(productService.getAllProducts(name, pageable));
     }
 
     @PutMapping("/update/{id}")

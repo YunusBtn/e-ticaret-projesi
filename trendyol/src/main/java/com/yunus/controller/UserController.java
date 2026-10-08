@@ -1,16 +1,20 @@
 package com.yunus.controller;
 
+import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.user.UserCreateRequest;
 import com.yunus.dto.user.UserResponse;
 import com.yunus.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -20,9 +24,9 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/create")
-    @PreAuthorize( "hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> createUser(
-             @Valid @RequestBody UserCreateRequest request) {
+            @Valid @RequestBody UserCreateRequest request) {
         UserResponse response = userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -37,8 +41,8 @@ public class UserController {
 
 
     @PutMapping("/update/{id}")
-    @PreAuthorize( "hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> updateUser( @Valid @PathVariable Long id, @RequestBody UserCreateRequest request) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> updateUser(@Valid @PathVariable Long id, @RequestBody UserCreateRequest request) {
         UserResponse response = userService.updateUser(id, request);
         return ResponseEntity.ok(response);
     }
@@ -51,9 +55,10 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PageResponse<UserResponse>> getAllUsers(
+            @ParameterObject @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok(userService.getAllUsers(pageable));
+
     }
-
-
 }
