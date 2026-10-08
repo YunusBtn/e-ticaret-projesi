@@ -61,7 +61,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
         } catch (Exception e){
-            log.warn("Geçersiz JWT token: ", e.getMessage());
+            log.warn("Geçersiz JWT token: {}", e.getMessage());
             SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);

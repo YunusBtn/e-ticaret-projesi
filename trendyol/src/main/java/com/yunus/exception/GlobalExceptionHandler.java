@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
 
         String user = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "anonim";
         log.warn("Yetkisiz erişim denemesi: {} {} - kullanıcı: {}", request.getMethod(), request.getRequestURI(), user);
-        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request);
+        return buildResponse(ErrorType.ACCESS_DENIED.getStatus(), ErrorType.ACCESS_DENIED.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
