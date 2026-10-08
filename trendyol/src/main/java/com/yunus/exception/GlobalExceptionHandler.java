@@ -49,7 +49,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
-        log.info("Giriş Denemesi Başarısız : ", request.getRequestURI(), ex.getMessage());
+
+        String user = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "anonim";
+        log.warn("Yetkisiz erişim denemesi: {} {} - kullanıcı: {}", request.getMethod(), request.getRequestURI(), user);
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request);
     }
 
