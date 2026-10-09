@@ -5,11 +5,10 @@ import com.yunus.dto.order.OrderRequest;
 import com.yunus.dto.order.OrderResponse;
 import com.yunus.entity.Order;
 import com.yunus.enums.OrderStatus;
+import com.yunus.model.UserPrincipal;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
-    OrderResponse createOrder(OrderRequest request);
-
     OrderResponse getOrderById(Long id);
 
     PageResponse<OrderResponse> getOrdersByUser(Long userId,Pageable pageable);
@@ -20,4 +19,5 @@ public interface OrderService {
 
     PageResponse<OrderResponse> getAllOrders(Pageable pageable);
 
+    OrderResponse createOrder(OrderRequest request, UserPrincipal principal);
 }

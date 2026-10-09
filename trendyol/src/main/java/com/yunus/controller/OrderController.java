@@ -4,6 +4,7 @@ import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.order.OrderRequest;
 import com.yunus.dto.order.OrderResponse;
 import com.yunus.enums.OrderStatus;
+import com.yunus.model.UserPrincipal;
 import com.yunus.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +12,13 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -26,12 +28,11 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/create")
-    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request) {
-
-        OrderResponse response = orderService.createOrder(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<OrderResponse> createOrder(
+            @Valid @RequestBody OrderRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        OrderResponse response = orderService.createOrder(request, principal);
     }
-
     @GetMapping("/get/{id}")
     public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getOrderById(id));

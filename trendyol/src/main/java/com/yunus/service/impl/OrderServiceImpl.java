@@ -12,6 +12,7 @@ import com.yunus.enums.OrderStatus;
 import com.yunus.exception.BusinessException;
 import com.yunus.exception.ErrorType;
 import com.yunus.mapper.OrderMapper;
+import com.yunus.model.UserPrincipal;
 import com.yunus.repository.OrderRepository;
 import com.yunus.repository.UserRepository;
 import com.yunus.service.OrderService;
@@ -40,8 +41,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderResponse createOrder(OrderRequest request) {
-        User user = userRepository.findById(request.getUserId())
+    public OrderResponse createOrder(OrderRequest request, UserPrincipal principal) {
+        User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new BusinessException(
                         ErrorType.NOT_FOUND, "Kullanıcı Bulunamadı, id : " + request.getUserId()));
 
