@@ -44,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse createOrder(OrderRequest request, UserPrincipal principal) {
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new BusinessException(
-                        ErrorType.NOT_FOUND, "Kullanıcı Bulunamadı, id : " + request.getUserId()));
+                        ErrorType.NOT_FOUND, "Kullanıcı Bulunamadı "  ));
 
         Order order = Order.builder()
                 .user(user)
