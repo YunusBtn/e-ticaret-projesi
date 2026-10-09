@@ -11,11 +11,13 @@ import com.yunus.repository.NotificationRepository;
 import com.yunus.repository.UserRepository;
 import com.yunus.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -49,7 +51,9 @@ public class NotificationServiceImpl implements NotificationService {
                 .stream()
                 .map(notificationMapper::toResponse)
                 .toList();
+
     }
+
 
     @Override
     public void markAsRead(Long notificationId) {
