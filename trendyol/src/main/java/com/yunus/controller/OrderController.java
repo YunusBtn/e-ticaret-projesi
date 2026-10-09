@@ -18,8 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
-
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -32,10 +30,13 @@ public class OrderController {
             @Valid @RequestBody OrderRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
         OrderResponse response = orderService.createOrder(request, principal);
+        return ResponseEntity.ok(response);
     }
     @GetMapping("/get/{id}")
-    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.getOrderById(id));
+    public ResponseEntity<OrderResponse> getOrderById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(orderService.getOrderById(id, principal));
     }
 
     @GetMapping("/user/{userId}")
@@ -59,6 +60,5 @@ public class OrderController {
             @ParameterObject @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(orderService.getAllOrders(pageable));
     }
-
 
 }

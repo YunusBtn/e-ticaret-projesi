@@ -9,7 +9,7 @@ import com.yunus.model.UserPrincipal;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
-    OrderResponse getOrderById(Long id);
+    OrderResponse getOrderById(Long id, UserPrincipal principal);
 
     PageResponse<OrderResponse> getOrdersByUser(Long userId,Pageable pageable);
 

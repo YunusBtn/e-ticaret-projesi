@@ -83,10 +83,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderResponse getOrderById(Long id) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Sipariş Bulunamadı"));
-
+    public OrderResponse getOrderById(Long id, UserPrincipal principal) {
+        Order order = findOrderOrThrow(id);
+        assertCanAccess(order, principal);
         return orderMapper.toResponse(order);
     }
 
@@ -120,4 +119,21 @@ public class OrderServiceImpl implements OrderService {
         PageableValidator.validateSort(pageable, ORDER_SORT_FIELDS);
         return PageResponse.from(orderRepository.findAll(pageable).map(orderMapper::toResponse));
     }
+
+    private BusinessException orderNotFound(Long id) {
+        return new BusinessException(ErrorType.NOT_FOUND, "Sipariş bulunamadı, id: " + id);
+    }
+
+    private Order findOrderOrThrow(Long id) {
+        return orderRepository.findById(id).orElseThrow(() -> orderNotFound(id));
+    }
+
+    private void assertCanAccess(Order order, UserPrincipal principal) {
+        boolean isOwner = order.getUser().getId().equals(principal.getId());
+        if (!isOwner && !principal.isAdmin()) {
+            throw orderNotFound(order.getId());
+        }
+
+
+}
 }
