@@ -1,6 +1,7 @@
 package com.yunus.model;
 
 import com.yunus.entity.User;
+import com.yunus.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -53,4 +54,13 @@ public class UserPrincipal implements UserDetails {
     public User getUser() {
         return user;
     }
+
+    public Long getId() {
+        return user.getId();
+    }
+
+    public boolean isAdmin() {
+        return user.getRole() == Role.ADMIN;
+    }
+
 }
