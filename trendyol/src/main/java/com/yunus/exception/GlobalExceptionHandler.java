@@ -29,13 +29,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
-        log.error("Beklenmeyen hata oluştu: {}", request.getRequestURI(), ex);
+        log.error("Geçersiz istek : ", ex.getMessage());
+
+        log.warn("Adres yolu : " + request.getRequestURI() + "olan hatanın mesajı : " + ex.getMessage() );
+
+        log.warn("Adres yolu : {}  olan hatanın mesajı : {} ", request.getRequestURI(), ex.getMessage());
+        log.error("Beklenmeyen hata oluştu: ", request.getRequestURI(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ErrorType.INTERNAL_ERROR.getMessage(), request);
     }
 
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        System.out.println("Deneme yazısı");
         return buildResponse(ErrorType.VALIDATION_ERROR.getStatus(), "Geçersiz parametre değeri : " +ex.getName(), request);
     }
 
@@ -49,6 +55,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+
 
         String user = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "anonim";
         log.warn("Yetkisiz erişim denemesi: {} {} - kullanıcı: {}", request.getMethod(), request.getRequestURI(), user);
