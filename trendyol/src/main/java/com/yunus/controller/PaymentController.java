@@ -2,11 +2,13 @@ package com.yunus.controller;
 
 import com.yunus.dto.payment.PaymentRequest;
 import com.yunus.dto.payment.PaymentResponse;
+import com.yunus.model.UserPrincipal;
 import com.yunus.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,13 +19,19 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/create")
-    public ResponseEntity<PaymentResponse> createPayment(@Valid  @RequestBody PaymentRequest request) {
-        PaymentResponse response = paymentService.createPayment(request);
+    public ResponseEntity<PaymentResponse> createPayment(
+            @Valid @RequestBody PaymentRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        PaymentResponse response = paymentService.createPayment(request, principal);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<PaymentResponse> getPaymentByOrderId(@PathVariable Long orderId) {
-        return ResponseEntity.ok(paymentService.getPaymentByOrderId(orderId));
+    public ResponseEntity<PaymentResponse> getPaymentByOrderId(
+            @PathVariable Long orderId,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        return ResponseEntity.ok(paymentService.getPaymentByOrderId(orderId, principal));
     }
 }

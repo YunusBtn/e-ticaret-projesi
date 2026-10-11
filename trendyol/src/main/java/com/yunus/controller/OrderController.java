@@ -43,7 +43,16 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderById(id, principal));
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<PageResponse<OrderResponse>> getMyOrders(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @ParameterObject @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(orderService.getOrdersByUser(principal.getId(), pageable));
+    }
+
+
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponse<OrderResponse>> getOrdersByUser(
             @PathVariable Long userId,
             @ParameterObject @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -51,6 +60,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderResponse> updateOrderStatus(
             @PathVariable Long id,
             @RequestParam OrderStatus newStatus

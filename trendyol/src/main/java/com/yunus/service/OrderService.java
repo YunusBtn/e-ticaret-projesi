@@ -15,7 +15,8 @@ public interface OrderService {
 
     OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus);
 
-    Order getOrderEntityById(Long id);
+    Order getOrderEntityForOwner(Long id,UserPrincipal principal);
+    Order getOrderEntityForAccess(Long id, UserPrincipal principal);
 
     PageResponse<OrderResponse> getAllOrders(Pageable pageable);
 

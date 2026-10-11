@@ -9,6 +9,7 @@ import com.yunus.enums.PaymentStatus;
 import com.yunus.exception.BusinessException;
 import com.yunus.exception.ErrorType;
 import com.yunus.mapper.PaymentMapper;
+import com.yunus.model.UserPrincipal;
 import com.yunus.repository.PaymentRepository;
 import com.yunus.service.OrderService;
 import com.yunus.service.PaymentService;
@@ -27,12 +28,19 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public PaymentResponse createPayment(PaymentRequest paymentRequest) {
+    public PaymentResponse createPayment(PaymentRequest paymentRequest, UserPrincipal principal) {
+
+        Order order = orderService.getOrderEntityForOwner(paymentRequest.getOrderId(), principal);
+
         paymentRepository.findByOrderId(paymentRequest.getOrderId()).ifPresent(payment -> {
-            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Bu siparişe ait ödeme zaten var, orderId: " + paymentRequest.getOrderId() + " ");
+            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Bu siparişe ait ödeme zaten var, orderId: " + order.getId());
         });
 
-        Order order = orderService.getOrderEntityById(paymentRequest.getOrderId());
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new BusinessException(ErrorType.INVALID_PAYMENT, "Sipariş durumu oluşturulmuş olmalıdır.");
+        }
+
 
         if (order.getTotalPrice().compareTo(paymentRequest.getAmount()) != 0) {
             throw new BusinessException(
@@ -57,7 +65,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public PaymentResponse getPaymentByOrderId(Long orderId) {
+    public PaymentResponse getPaymentByOrderId(Long orderId, UserPrincipal principal) {
+        orderService.getOrderEntityForAccess(orderId, principal);
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Bulunamadı, Ödeme Kaydı : " + orderId + " "));
 

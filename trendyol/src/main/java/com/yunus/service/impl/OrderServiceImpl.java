@@ -44,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse createOrder(OrderRequest request, UserPrincipal principal) {
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new BusinessException(
-                        ErrorType.NOT_FOUND, "Kullanıcı Bulunamadı "  ));
+                        ErrorType.NOT_FOUND, "Kullanıcı Bulunamadı "));
 
         Order order = Order.builder()
                 .user(user)
@@ -108,10 +108,22 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public Order getOrderEntityById(Long id) {
-        return orderRepository.findById(id)
-                .orElseThrow(()-> new BusinessException(ErrorType.NOT_FOUND, "Sipariş bulunamadı"));
+    public Order getOrderEntityForOwner(Long id, UserPrincipal principal) {
+        Order order = findOrderOrThrow(id);
+        if (!order.getUser().getId().equals(principal.getId())) {
+            throw orderNotFound(id);
+        }
+        return order;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Order getOrderEntityForAccess(Long id, UserPrincipal principal) {
+        Order order = findOrderOrThrow(id);
+        assertCanAccess(order, principal);
+        return order;
+    }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -135,5 +147,5 @@ public class OrderServiceImpl implements OrderService {
         }
 
 
-}
+    }
 }
