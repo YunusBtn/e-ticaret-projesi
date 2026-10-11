@@ -30,8 +30,8 @@ public class PaymentController {
     @GetMapping("/order/{orderId}")
     public ResponseEntity<PaymentResponse> getPaymentByOrderId(
             @PathVariable Long orderId,
-            @AuthenticationPrincipal UserPrincipal principal
-    ) {
+            @AuthenticationPrincipal UserPrincipal principal)
+    {
         return ResponseEntity.ok(paymentService.getPaymentByOrderId(orderId, principal));
     }
 }
