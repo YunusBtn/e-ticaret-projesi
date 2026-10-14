@@ -1,9 +1,11 @@
 package com.yunus.controller;
 
 import com.yunus.dto.notification.NotificationResponse;
+import com.yunus.model.UserPrincipal;
 import com.yunus.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,20 +17,23 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<NotificationResponse>> getUserNotifications(@PathVariable Long userId) {
-        return ResponseEntity.ok(notificationService.getUserNotifications(userId));
+    @GetMapping("/my")
+    public ResponseEntity<List<NotificationResponse>> getMyNotifications(
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(notificationService.getUserNotifications(principal));
     }
 
+
     @PatchMapping("/{id}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
-        notificationService.markAsRead(id);
+    public ResponseEntity<Void> markAsRead(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        notificationService.markAsRead(id, principal);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/user/{userId}/unread-count")
-    public ResponseEntity<Long> countUnread(@PathVariable Long userId) {
-        return ResponseEntity.ok(notificationService.countUnread(userId));
+    @GetMapping("/my/unread-count")
+    public ResponseEntity<Long> countMyUnread(@AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(notificationService.countUnread(principal));
     }
 }
