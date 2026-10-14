@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final NotificationRepository notificationRepository;
     private final OrderRepository orderRepository;
-
+    
     @Override
     public UserResponse createUser(UserCreateRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -81,9 +81,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponse updateUser(Long id, UserCreateRequest request) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Kullanıcı bulunamadı"));
+                .orElseThrow(() -> userNotFound(id));
+
+        boolean demoting = request.getRole() != null && request.getRole() != Role.ADMIN;
+
+        if (demoting && isLastAdmin(existingUser)) {
+            throw new BusinessException(ErrorType.LAST_ADMIN_PROTECTED);
+        }
+
         existingUser.setUsername(request.getUsername());
         existingUser.setEmail(request.getEmail());
 
@@ -106,7 +114,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorType.USER_HAS_RECORDS);
         }
 
-        if (target.getRole() == Role.ADMIN && userRepository.countByRole(Role.ADMIN) <= 1) {
+        if (isLastAdmin(target)) {
             if (successorId == null) {
                 throw new BusinessException(ErrorType.LAST_ADMIN_PROTECTED,
                         "- devralacak kullanıcıyı successorId ile belirtin");
@@ -123,6 +131,10 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.delete(target);
 
+    }
+
+    private boolean isLastAdmin(User user) {
+        return user.getRole() == Role.ADMIN && userRepository.countByRole(Role.ADMIN) <= 1;
     }
 
     private BusinessException userNotFound(Long id) {
