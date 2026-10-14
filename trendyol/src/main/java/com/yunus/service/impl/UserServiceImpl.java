@@ -9,6 +9,7 @@ import com.yunus.enums.Role;
 import com.yunus.exception.BusinessException;
 import com.yunus.exception.ErrorType;
 import com.yunus.mapper.UserMapper;
+import com.yunus.model.UserPrincipal;
 import com.yunus.repository.UserRepository;
 import com.yunus.service.UserService;
 import com.yunus.util.PageableValidator;
@@ -50,7 +51,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponse getUserById(Long id) {
+    public UserResponse getUserById(Long id, UserPrincipal principal) {
+
+        if (!principal.isAdmin() && !principal.getId().equals(id)) {
+            throw userNotFound(id);
+        }
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Kullanıcı, id: " + id));
         return userMapper.toResponse(user);
@@ -76,7 +82,7 @@ public class UserServiceImpl implements UserService {
         existingUser.setUsername(request.getUsername());
         existingUser.setEmail(request.getEmail());
 
-        if(request.getRole() != null) {
+        if (request.getRole() != null) {
             existingUser.setRole(request.getRole());
         }
 
@@ -91,4 +97,10 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
 
     }
+
+    private BusinessException userNotFound(Long id) {
+        return new BusinessException(ErrorType.NOT_FOUND, "Kullanıcı bulunamadı, id: " + id);
+    }
+
+
 }

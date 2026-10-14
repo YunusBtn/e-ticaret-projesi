@@ -3,6 +3,7 @@ package com.yunus.controller;
 import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.user.UserCreateRequest;
 import com.yunus.dto.user.UserResponse;
+import com.yunus.model.UserPrincipal;
 import com.yunus.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -32,11 +34,11 @@ public class UserController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUserById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal principal) {
 
-        UserResponse userResponse = userService.getUserById(id);
-
-        return ResponseEntity.ok(userResponse);
+        return ResponseEntity.ok(userService.getUserById(id, principal));
     }
 
 
