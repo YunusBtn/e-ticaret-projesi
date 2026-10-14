@@ -4,12 +4,15 @@ package com.yunus.service.impl;
 import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.user.UserCreateRequest;
 import com.yunus.dto.user.UserResponse;
+import com.yunus.entity.Order;
 import com.yunus.entity.User;
 import com.yunus.enums.Role;
 import com.yunus.exception.BusinessException;
 import com.yunus.exception.ErrorType;
 import com.yunus.mapper.UserMapper;
 import com.yunus.model.UserPrincipal;
+import com.yunus.repository.NotificationRepository;
+import com.yunus.repository.OrderRepository;
 import com.yunus.repository.UserRepository;
 import com.yunus.service.UserService;
 import com.yunus.util.PageableValidator;
@@ -33,6 +36,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationRepository notificationRepository;
+    private final OrderRepository orderRepository;
 
     @Override
     public UserResponse createUser(UserCreateRequest request) {
@@ -91,10 +96,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Silinmek istenen Kullanıcı Bulunamadı"));
-        userRepository.delete(user);
+    @Transactional
+    public void deleteUser(Long id, Long successorId) {
+
+        User target = userRepository.findById(id)
+                .orElseThrow(() -> userNotFound(id));
+
+        if (orderRepository.existsByUserId(id) || notificationRepository.existsByUserId(id)) {
+            throw new BusinessException(ErrorType.USER_HAS_RECORDS);
+        }
+
+        if (target.getRole() == Role.ADMIN && userRepository.countByRole(Role.ADMIN) <= 1) {
+            if (successorId == null) {
+                throw new BusinessException(ErrorType.LAST_ADMIN_PROTECTED,
+                        "- devralacak kullanıcıyı successorId ile belirtin");
+            }
+
+            if (successorId.equals(id)) {
+                throw new BusinessException(ErrorType.VALIDATION_ERROR, "- DEVRALAN KİŞİ SİLİNEN KİŞİ OLAMAZ");
+            }
+
+            User successor = userRepository.findById(successorId)
+                    .orElseThrow(() -> userNotFound(successorId));
+            successor.setRole(Role.ADMIN);
+
+        }
+        userRepository.delete(target);
 
     }
 

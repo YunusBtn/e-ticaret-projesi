@@ -51,8 +51,12 @@ public class UserController {
 
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long successorId
+    ) {
+        userService.deleteUser(id, successorId);
         return ResponseEntity.noContent().build();
     }
 

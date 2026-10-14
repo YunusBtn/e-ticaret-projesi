@@ -18,6 +18,6 @@ public interface UserService {
 
     PageResponse<UserResponse> getAllUsers(Pageable pageable);
 
-    void deleteUser(Long id);
+    void deleteUser(Long id, Long successorId);
 
 }
