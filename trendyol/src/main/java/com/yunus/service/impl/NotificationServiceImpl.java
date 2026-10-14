@@ -7,6 +7,7 @@ import com.yunus.enums.NotificationType;
 import com.yunus.exception.BusinessException;
 import com.yunus.exception.ErrorType;
 import com.yunus.mapper.NotificationMapper;
+import com.yunus.model.UserPrincipal;
 import com.yunus.repository.NotificationRepository;
 import com.yunus.repository.UserRepository;
 import com.yunus.service.NotificationService;
@@ -46,27 +47,29 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<NotificationResponse> getUserNotifications(Long userId) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
+    public List<NotificationResponse> getUserNotifications(UserPrincipal principal) {
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(principal.getId())
                 .stream()
                 .map(notificationMapper::toResponse)
                 .toList();
-
     }
 
 
     @Override
-    public void markAsRead(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Bildirim Bulunamadı : " + notificationId + " "));
+    @Transactional
+    public void markAsRead(Long notificationId, UserPrincipal principal) {
+        Notification notification = notificationRepository
+                .findByIdAndUserId(notificationId, principal.getId())
+                .orElseThrow(() -> new BusinessException(
+                        ErrorType.NOT_FOUND, "Bildirim bulunamadı, id: " + notificationId));
+
+
         notification.setIsRead(true);
-        notificationRepository.save(notification);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public long countUnread(Long userId) {
-
-        return notificationRepository.countByUserIdAndIsReadFalse(userId);
+    public long countUnread(UserPrincipal principal) {
+        return notificationRepository.countByUserIdAndIsReadFalse(principal.getId());
     }
 }
