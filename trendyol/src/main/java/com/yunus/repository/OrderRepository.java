@@ -12,6 +12,9 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
 
+
+    boolean existsByUserId(Long userId);
+
     @EntityGraph(attributePaths = "user")
     Page<Order> findByUserId(Long userId, Pageable pageable);
 
