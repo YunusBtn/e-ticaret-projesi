@@ -10,6 +10,7 @@ import com.yunus.mapper.ProductMapper;
 import com.yunus.repository.ProductRepository;
 import com.yunus.service.ProductService;
 import com.yunus.util.PageableValidator;
+import jakarta.persistence.Version;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -79,6 +80,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public Product decreaseStockAndGetProduct(Long productId, int quantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "ürün bulunamadı"));

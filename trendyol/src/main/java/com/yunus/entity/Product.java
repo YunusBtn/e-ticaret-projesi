@@ -29,6 +29,7 @@ public class Product {
     private BigDecimal price;
 
     @Column(nullable = false, name = "stock_quantity")
+    @Version
     private Integer stockQuantity;
 
     @Column(name = "creadet_at", updatable = false)

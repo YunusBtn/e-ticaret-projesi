@@ -1,10 +1,8 @@
 package com.yunus.exception;
 
-import com.yunus.entity.Order;
-import com.yunus.repository.OrderRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -25,7 +23,6 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
 
-
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex, HttpServletRequest request) {
         return buildResponse(ex.getErrorType().getStatus(), ex.getMessage(), request);
@@ -40,17 +37,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
-        return buildResponse(ErrorType.VALIDATION_ERROR.getStatus(), "Geçersiz parametre değeri : " +ex.getName(), request);
+        return buildResponse(ErrorType.VALIDATION_ERROR.getStatus(), "Geçersiz parametre değeri : " + ex.getName(), request);
 
     }
 
-
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLock(OptimisticLockingFailureException ex, HttpServletRequest request) {
+        log.warn("Eşzamanlı güncelleme hatası {} {}", request.getMethod(), ex.getMessage());
+        return buildResponse(ErrorType.CONCURRENT_UPDATE.getStatus(), ErrorType.CONCURRENT_UPDATE.getMessage(), request);
+    }
 
     @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleAuthFailure(Exception ex, HttpServletRequest request) {
 
         log.info("Giriş Denemesi Başarısız : {} - {}", request.getRequestURI(), ex.getMessage());
-        return buildResponse(ErrorType.INVALID_CREDENTIALS.getStatus(),ErrorType.INVALID_CREDENTIALS.getMessage(), request);
+        return buildResponse(ErrorType.INVALID_CREDENTIALS.getStatus(), ErrorType.INVALID_CREDENTIALS.getMessage(), request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
