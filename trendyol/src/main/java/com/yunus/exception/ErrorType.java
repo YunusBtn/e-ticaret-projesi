@@ -16,7 +16,8 @@ public enum ErrorType {
     ACCESS_DENIED("Bu işlem için yetkiniz yok", HttpStatus.FORBIDDEN),
     LAST_ADMIN_PROTECTED("Sistemdeki son yönetici kaydı olan kullanıcı silinemez", HttpStatus.CONFLICT),
     USER_HAS_RECORDS("Kullanıcı kayıtlı olduğu için silinemez", HttpStatus.CONFLICT),
-    CONCURRENT_UPDATE("Kayıt başka bir işlem tarafından değiştirildi, lütfen tekrar deneyin", HttpStatus.CONFLICT);
+    CONCURRENT_UPDATE("Kayıt başka bir işlem tarafından değiştirildi, lütfen tekrar deneyin", HttpStatus.CONFLICT),
+    INVALID_STATUS_TRANSITION("Sipariş durumu bu şekilde değiştirilemez", HttpStatus.CONFLICT);
 
     private final String message;
     private final HttpStatus status;

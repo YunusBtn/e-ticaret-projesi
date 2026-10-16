@@ -97,12 +97,16 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @Transactional
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Sipariş bulunamadı"));
-        order.setStatus(newStatus);
-        Order updated = orderRepository.save(order);
-        return orderMapper.toResponse(updated);
+
+        if (newStatus != OrderStatus.SHIPPED && newStatus != OrderStatus.DELIVERED) {
+            throw new BusinessException(ErrorType.VALIDATION_ERROR,
+                    " - yönetici yalnızca SHIPPED veya DELIVERED durumlarına geçebilir.");
+        }
+        Order order = findOrderOrThrow(orderId);
+        changeStatus(order, newStatus);
+        return orderMapper.toResponse(order);
     }
 
     @Override
@@ -145,6 +149,15 @@ public class OrderServiceImpl implements OrderService {
             throw orderNotFound(order.getId());
         }
 
-
     }
+
+    private void changeStatus(Order order, OrderStatus target) {
+        if (!order.getStatus().canTransitionTo(target)) {
+            throw new BusinessException(ErrorType.INVALID_STATUS_TRANSITION,
+                    "- " + order.getStatus() + " durumundan " + target + " durumuna geçiş yapılamaz.");
+        }
+        order.setStatus(target);
+    }
+
+
 }
