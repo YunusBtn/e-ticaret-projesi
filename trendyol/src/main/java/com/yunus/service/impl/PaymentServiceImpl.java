@@ -58,7 +58,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment savedPayment = paymentRepository.save(payment);
 
-        orderService.updateOrderStatus(paymentRequest.getOrderId(), OrderStatus.PAID);
+        orderService.markAsPaid(order.getId());
 
         return paymentMapper.toResponse(savedPayment);
     }
