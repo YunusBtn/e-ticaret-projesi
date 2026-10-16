@@ -81,6 +81,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
+    public void markAsPaid(Long orderId) {
+        changeStatus(findOrderOrThrow(orderId), OrderStatus.PAID);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public OrderResponse getOrderById(Long id, UserPrincipal principal) {
         Order order = findOrderOrThrow(id);
