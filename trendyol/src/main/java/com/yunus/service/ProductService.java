@@ -20,4 +20,7 @@ public interface ProductService {
     Product decreaseStockAndGetProduct(Long productId, int quantity);
 
     PageResponse<ProductResponse> getAllProducts(String name, Pageable pageable);
+
+
+    void increaseStock(Long productId, int quantity);
 }

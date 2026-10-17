@@ -23,7 +23,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private static  final Set<String> DEFAULT_SORT_FIELD = Set.of("id", "name", "price", "stockQuantity", "createdAt");
+    private static final Set<String> DEFAULT_SORT_FIELD = Set.of("id", "name", "price", "stockQuantity", "createdAt");
 
 
     private final ProductRepository productRepository;
@@ -48,13 +48,21 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> getAllProducts(String name, Pageable pageable) {
-        PageableValidator.validateSort(pageable,DEFAULT_SORT_FIELD);
+        PageableValidator.validateSort(pageable, DEFAULT_SORT_FIELD);
 
         Page<Product> products = (name == null || name.isBlank())
                 ? productRepository.findAll(pageable)
                 : productRepository.findByNameContainingIgnoreCase(name, pageable);
 
         return PageResponse.from(products.map(productMapper::toResponse));
+    }
+
+    @Override
+    @Transactional
+    public void increaseStock(Long productId, int quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Ürün Bulunamadı"));
+        product.setStockQuantity(product.getStockQuantity() + quantity);
     }
 
     @Override
