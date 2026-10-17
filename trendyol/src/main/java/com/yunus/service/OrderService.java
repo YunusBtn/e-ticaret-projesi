@@ -25,4 +25,6 @@ public interface OrderService {
 
     void markAsPaid(Long orderId);
 
+    OrderResponse cancelOrder(Long orderId, UserPrincipal principal);
+
 }

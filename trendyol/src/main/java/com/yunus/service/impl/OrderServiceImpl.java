@@ -19,6 +19,7 @@ import com.yunus.service.OrderService;
 import com.yunus.service.ProductService;
 import com.yunus.util.PageableValidator;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,6 +85,21 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void markAsPaid(Long orderId) {
         changeStatus(findOrderOrThrow(orderId), OrderStatus.PAID);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse cancelOrder(Long orderId, UserPrincipal principal) {
+        Order order = getOrderEntityForOwner(orderId, principal);
+
+        changeStatus(order, OrderStatus.CANCELLED);
+
+        for (OrderItem item : order.getOrderItems()) {
+
+            productService.increaseStock(item.getProduct().getId(), item.getQuantity());
+
+        }
+        return orderMapper.toResponse(order);
     }
 
     @Override
