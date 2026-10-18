@@ -47,6 +47,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Transactional(readOnly = true)
+    @Override
     public PageResponse<ProductResponse> getAllProducts(String name, Pageable pageable) {
         PageableValidator.validateSort(pageable, DEFAULT_SORT_FIELD);
 
