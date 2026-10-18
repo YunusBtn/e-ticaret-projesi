@@ -14,6 +14,7 @@ import com.yunus.repository.PaymentRepository;
 import com.yunus.service.OrderService;
 import com.yunus.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +57,14 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
 
 
-        Payment savedPayment = paymentRepository.save(payment);
+        Payment savedPayment;
+
+        try {
+            savedPayment = paymentRepository.save(payment);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(ErrorType.DUPLICATE_ENTRY,
+                    "- BU SİPARİŞE AİT ÖDEME ZATEN VAR, orderId : " + order.getId());
+        }
 
         orderService.markAsPaid(order.getId());
 
