@@ -132,7 +132,10 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean isLastAdmin(User user) {
-        return user.getRole() == Role.ADMIN && userRepository.countByRole(Role.ADMIN) <= 1;
+        if (user.getRole() != Role.ADMIN) {
+            return false;
+        }
+        return userRepository.findAllByRoleForUpdate(Role.ADMIN).size() <= 1;
     }
 
     private BusinessException userNotFound(Long id) {
