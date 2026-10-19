@@ -60,7 +60,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/all")
+    @GetMapping("/get/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponse<UserResponse>> getAllUsers(
             @ParameterObject @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
