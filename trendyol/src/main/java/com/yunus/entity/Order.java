@@ -29,7 +29,6 @@ public class Order {
     @Version
     private Long version;
 
-
     @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
