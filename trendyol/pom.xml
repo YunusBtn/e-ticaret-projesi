@@ -47,10 +47,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <!-- Boot 4'te Spring MVC'nin asıl starter'ı: eski adı spring-boot-starter-web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <!-- "spring-boot-starter-webmvc" yerine doğrusu bu -->
+            <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
 
         <!-- MapStruct'ın kendisi: runtime'da mapper'ların çalışması için gereken çekirdek kütüphane -->
@@ -76,6 +76,19 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Boot 4'te Flyway'i uygulama açılırken çalıştıran otomatik yapılandırma bu starter'da.
+             Sadece flyway-core yazmak artık yetmiyor. Sürümü Boot yönettiği için yazmıyoruz. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
+        </dependency>
+        <!-- Flyway'in PostgreSQL'e özel modülü: bu olmadan Flyway PostgreSQL'i tanımaz -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+
+        <!-- Boot 4.1 ile uyumlu seri (3.0.1 Boot 4.0 serisini hedefliyordu) -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -99,6 +112,26 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>${jjwt.version}</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- ===== TEST BAĞIMLILIKLARI (Madde 6) ===== -->
+        <!-- JUnit 5 + Mockito + AssertJ: service birim testleri için -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- MockMvc: controller'ları HTTP isteği atar gibi test etmek için (Boot 4'te ayrı starter) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- @WithMockUser vb.: "USER bu endpoint'e 403 alır" testleri için -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
