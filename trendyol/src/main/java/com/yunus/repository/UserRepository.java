@@ -23,5 +23,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.role = :role order by u.id")
     List<User> findAllByRoleForUpdate(@Param("role") Role role);
 
+    boolean existByRole(Role role);
 
 }
