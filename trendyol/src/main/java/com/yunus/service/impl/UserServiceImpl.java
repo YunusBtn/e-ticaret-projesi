@@ -23,7 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 
 @Service
@@ -73,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
         PageableValidator.validateSort(pageable, USER_SORT_FIELDS);
 
-        Page<UserResponse> page = userRepository.findAll(pageable)
+        Page<UserResponse> page = userRepository.findAllByDeletedAtIsNull(pageable)
                 .map(userMapper::toResponse);
 
         return PageResponse.from(page);
@@ -107,11 +109,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(Long id, Long successorId) {
 
-        User target = userRepository.findById(id)
-                .orElseThrow(() -> userNotFound(id));
+        User target = findActiveUserOrThrow(id);
 
-        if (orderRepository.existsByUserId(id) || notificationRepository.existsByUserId(id)) {
-            throw new BusinessException(ErrorType.USER_HAS_RECORDS);
+        if (orderRepository.existsByUserIdAndStatusIn(id, ACTIVE_ORDER_STATUSES)) {
+            throw new BusinessException(ErrorType.USER_HAS_ACTIVE_ORDERS);
         }
 
         if (isLastAdmin(target)) {
@@ -124,13 +125,19 @@ public class UserServiceImpl implements UserService {
                 throw new BusinessException(ErrorType.VALIDATION_ERROR, "- DEVRALAN KİŞİ SİLİNEN KİŞİ OLAMAZ");
             }
 
-            User successor = userRepository.findById(successorId)
-                    .orElseThrow(() -> userNotFound(successorId));
+            User successor = findActiveUserOrThrow(successorId);
             successor.setRole(Role.ADMIN);
 
         }
-        userRepository.delete(target);
 
+        target.setUsername("deleted-" + id);
+        target.setEmail("deleted-" + id + "@deleted.invalid");
+        target.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+        target.setRole(Role.USER);
+        target.setDeletedAt(LocalDateTime.now());
+
+
+        notificationRepository.deleteByUserId(id);
     }
 
     private boolean isLastAdmin(User user) {
