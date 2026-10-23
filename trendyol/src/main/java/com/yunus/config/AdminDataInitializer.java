@@ -32,8 +32,8 @@ public class AdminDataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        if (userRepository.findByUsername(adminUsername).isPresent()) {
-            log.info("Admin kullanıcısı zaten var: {}", adminUsername);
+        if (userRepository.existsByRole(Role.ADMIN)) {
+           log.info("Sistemde yönetici mevcut, bootstrap atandı");
             return;
         }
 
