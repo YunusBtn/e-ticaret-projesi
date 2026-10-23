@@ -1,6 +1,4 @@
 ALTER TABLE trendyol.users ADD COLUMN updated_at TIMESTAMP(6);
-UPDATE trendyol.users
-ALTER TABLE trendyol.users ADD COLUMN updated_at TIMESTAMP(6);
 UPDATE trendyol.users SET updated_at = COALESCE(created_at, now());
 ALTER TABLE trendyol.users ALTER COLUMN updated_at SET NOT NULL;
 

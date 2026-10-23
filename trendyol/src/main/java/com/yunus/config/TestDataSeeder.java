@@ -94,10 +94,7 @@ public class TestDataSeeder implements CommandLineRunner {
 
             users.add(
                     User.builder()
-                            .createdAt(LocalDateTime
-                                    .now()
-                                    .minusDays(random.nextInt(0, 365))
-                                    .minusMinutes(random.nextInt(0, 1440)))
+
                             .username(username)
                             .email(username + "@example.com")
                             .password(hashedPassword)
@@ -119,10 +116,7 @@ public class TestDataSeeder implements CommandLineRunner {
 
             products.add(
                     Product.builder()
-                            .createdAt(LocalDateTime
-                                    .now()
-                                    .minusDays(random.nextInt(0, 365))
-                                    .minusMinutes(random.nextInt(0, 1440)))
+
                             .name(name)
                             .description("Test ürünü: " + name)
                             .price(BigDecimal.valueOf(
@@ -152,7 +146,6 @@ public class TestDataSeeder implements CommandLineRunner {
             Order order = Order.builder()
                     .user(user)
                     .status(statuses[random.nextInt(statuses.length)])
-                    .createdAt(createdAt)
                     .build();
 
             List<Product> pool = new ArrayList<>(products);
