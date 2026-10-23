@@ -34,4 +34,7 @@ public class Product extends BaseEntity{
     @Column(nullable = false, name = "stock_quantity")
     private Integer stockQuantity;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
 }

@@ -32,4 +32,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
 }

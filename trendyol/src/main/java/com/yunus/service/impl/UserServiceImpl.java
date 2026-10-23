@@ -5,6 +5,7 @@ import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.user.UserCreateRequest;
 import com.yunus.dto.user.UserResponse;
 import com.yunus.entity.User;
+import com.yunus.enums.OrderStatus;
 import com.yunus.enums.Role;
 import com.yunus.exception.BusinessException;
 import com.yunus.exception.ErrorType;
@@ -30,6 +31,9 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
 
     private static final Set<String> USER_SORT_FIELDS = Set.of("id", "username", "email", "role");
+
+    private static final Set<OrderStatus> ACTIVE_ORDER_STATUSES =
+            Set.of(OrderStatus.PENDING, OrderStatus.PAID, OrderStatus.SHIPPED);
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -60,9 +64,7 @@ public class UserServiceImpl implements UserService {
             throw userNotFound(id);
         }
 
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Kullanıcı, id: " + id));
-        return userMapper.toResponse(user);
+        return userMapper.toResponse(findActiveUserOrThrow(id));
     }
 
     @Override
@@ -142,5 +144,9 @@ public class UserServiceImpl implements UserService {
         return new BusinessException(ErrorType.NOT_FOUND, "Kullanıcı bulunamadı, id: " + id);
     }
 
+    private User findActiveUserOrThrow(Long id) {
+        return userRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> userNotFound(id));
+    }
 
 }
