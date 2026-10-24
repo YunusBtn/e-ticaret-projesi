@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Service
@@ -40,9 +41,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public ProductResponse getProductById(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Ürün Bulunamadı"));
-        return productMapper.toResponse(product);
+        return productMapper.toResponse(findActiveProductOrThrow(id));
     }
 
 
@@ -52,8 +51,8 @@ public class ProductServiceImpl implements ProductService {
         PageableValidator.validateSort(pageable, DEFAULT_SORT_FIELD);
 
         Page<Product> products = (name == null || name.isBlank())
-                ? productRepository.findAll(pageable)
-                : productRepository.findByNameContainingIgnoreCase(name, pageable);
+                ? productRepository.findAllByDeletedAtIsNull(pageable)
+                : productRepository.findAllByNameContainingIgnoreCaseAndDeletedAtIsNull(name, pageable);
 
         return PageResponse.from(products.map(productMapper::toResponse));
     }
@@ -62,15 +61,14 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void increaseStock(Long productId, int quantity) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Ürün Bulunamadı"));
+                .orElseThrow(() -> productNotFound(productId));
         product.setStockQuantity(product.getStockQuantity() + quantity);
     }
 
     @Override
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {
-        Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Ürün bulunamadı"));
+        Product existing = findActiveProductOrThrow(id);
         existing.setName(request.getName());
         existing.setPrice(request.getPrice());
         existing.setDescription(request.getDescription());
@@ -82,17 +80,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "Silinecek ürün bulunmadı"));
-        productRepository.delete(product);
+        Product product = findActiveProductOrThrow(id);
+        product.setDeletedAt(LocalDateTime.now());
 
     }
 
     @Override
     @Transactional
     public Product decreaseStockAndGetProduct(Long productId, int quantity) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BusinessException(ErrorType.NOT_FOUND, "ürün bulunamadı"));
+        Product product = findActiveProductOrThrow(productId);
+
 
         if (product.getStockQuantity() < quantity) {
             throw new BusinessException(ErrorType.INSUFFICIENT_STOCK,
@@ -105,6 +102,17 @@ public class ProductServiceImpl implements ProductService {
         product.setStockQuantity(product.getStockQuantity() - quantity);
 
         return productRepository.save(product);
+    }
+
+
+    private Product findActiveProductOrThrow(Long id) {
+        return productRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> productNotFound(id));
+    }
+
+
+    private BusinessException productNotFound(Long id) {
+        return new BusinessException(ErrorType.NOT_FOUND, "ürün bulunamadı, id: " + id);
     }
 
 

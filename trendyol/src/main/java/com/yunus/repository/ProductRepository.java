@@ -14,7 +14,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByStockQuantityGreaterThan(Integer quantity);
 
-
     Optional<Product> findByIdAndDeletedAtIsNull(Long id);
 
     Page<Product> findAllByDeletedAtIsNull(Pageable pageable);
