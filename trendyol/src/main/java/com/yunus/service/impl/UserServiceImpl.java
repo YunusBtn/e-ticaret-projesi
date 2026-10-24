@@ -130,8 +130,10 @@ public class UserServiceImpl implements UserService {
 
         }
 
-        target.setUsername("deleted-" + id);
-        target.setEmail("deleted-" + id + "@deleted.invalid");
+        String token = UUID.randomUUID().toString();
+
+        target.setUsername("deleted-" + token);
+        target.setEmail("deleted-" + token + "@deleted.invalid");
         target.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
         target.setRole(Role.USER);
         target.setDeletedAt(LocalDateTime.now());
