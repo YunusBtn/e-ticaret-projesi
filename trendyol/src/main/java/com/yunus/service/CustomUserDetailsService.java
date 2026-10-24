@@ -23,6 +23,4 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new UserPrincipal(user);
     }
 
-
-
 }
