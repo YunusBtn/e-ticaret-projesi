@@ -1,12 +1,14 @@
 package com.yunus.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,6 +43,13 @@ public class GlobalExceptionHandler {
         return buildResponse(ErrorType.VALIDATION_ERROR.getStatus(), "Geçersiz parametre değeri : " + ex.getName(), request);
 
     }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationRequired(HttpServletRequest request, AuthenticationException ex) {
+
+        return buildResponse(ErrorType.AUTHENTICATION_REQUIRED.getStatus(), ErrorType.AUTHENTICATION_REQUIRED.getMessage(), request);
+    }
+
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<ErrorResponse> handleOptimisticLock(OptimisticLockingFailureException ex, HttpServletRequest request) {

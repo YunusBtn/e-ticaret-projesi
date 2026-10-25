@@ -18,7 +18,8 @@ public enum ErrorType {
     USER_HAS_RECORDS("Kullanıcı kayıtlı olduğu için silinemez", HttpStatus.CONFLICT),
     CONCURRENT_UPDATE("Kayıt başka bir işlem tarafından değiştirildi, lütfen tekrar deneyin", HttpStatus.CONFLICT),
     INVALID_STATUS_TRANSITION("Sipariş durumu bu şekilde değiştirilemez", HttpStatus.CONFLICT),
-    USER_HAS_ACTIVE_ORDERS("Kullanıcı aktif siparişlerine sahip olduğu için silinemez", HttpStatus.CONFLICT);
+    USER_HAS_ACTIVE_ORDERS("Kullanıcı aktif siparişlerine sahip olduğu için silinemez", HttpStatus.CONFLICT),
+    AUTHENTICATION_REQUIRED("Kimlik doğrulaması gerekli veya oturum süresi doldu", HttpStatus.UNAUTHORIZED);
 
     private final String message;
     private final HttpStatus status;
