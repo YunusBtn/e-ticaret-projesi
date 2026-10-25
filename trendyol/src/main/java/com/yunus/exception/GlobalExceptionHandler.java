@@ -47,7 +47,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationRequired(HttpServletRequest request, AuthenticationException ex) {
 
-        return buildResponse(ErrorType.AUTHENTICATION_REQUIRED.getStatus(), ErrorType.AUTHENTICATION_REQUIRED.getMessage(), request);
+        return buildResponse(ErrorType.AUTHENTICATION_REQUIRED.getStatus(),
+                ErrorType.AUTHENTICATION_REQUIRED.getMessage(), request);
     }
 
 
