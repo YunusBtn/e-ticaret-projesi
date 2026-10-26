@@ -3,7 +3,6 @@ package com.yunus.service;
 import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.user.UserCreateRequest;
 import com.yunus.dto.user.UserResponse;
-import com.yunus.entity.User;
 import com.yunus.model.UserPrincipal;
 import org.springframework.data.domain.Pageable;
 
