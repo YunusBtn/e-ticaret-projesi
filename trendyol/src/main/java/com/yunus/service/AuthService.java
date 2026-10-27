@@ -27,11 +27,11 @@ public class AuthService {
 
     public AuthResponse register(AuthRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Username already exists");
+            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Kullanıcı adı");
         }
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Email already exists");
+            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "e-posta");
         }
 
         User user = User.builder()

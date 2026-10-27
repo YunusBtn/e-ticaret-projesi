@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse createUser(UserCreateRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "username" + request.getUsername());
+            throw new BusinessException(ErrorType.DUPLICATE_ENTRY,"Kullanıcı adı");
         }
         User user = userMapper.toEntity(request);
         user.setRole(request.getRole() != null ? request.getRole() : Role.USER);
