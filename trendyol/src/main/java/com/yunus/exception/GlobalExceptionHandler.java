@@ -12,6 +12,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -74,13 +76,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MissingServletRequestParameterException.class})
-    public ResponseEntity<ErrorResponse> handleMalformedRequest(Exception ex,HttpServletRequest request){
+    public ResponseEntity<ErrorResponse> handleMalformedRequest(Exception ex, HttpServletRequest request) {
         return buildResponse(ErrorType.MALFORMED_REQUEST.getStatus(), ErrorType.MALFORMED_REQUEST.getMessage(), request);
     }
 
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+        return buildResponse(ErrorType.METHOD_NOT_ALLOWED.getStatus(), ErrorType.METHOD_NOT_ALLOWED.getMessage(), request);
+    }
 
-
-
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
+        return buildResponse(ErrorType.UNSUPPORTED_MEDIA_TYPE.getStatus(), ErrorType.UNSUPPORTED_MEDIA_TYPE.getMessage(), request);
+    }
 
 
     @ExceptionHandler(AccessDeniedException.class)
