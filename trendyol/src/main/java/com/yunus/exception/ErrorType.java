@@ -14,12 +14,14 @@ public enum ErrorType {
     INTERNAL_ERROR("Beklenmeyen bir hata oluştu", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_CREDENTIALS("Kullanıcı adı veya şifre hatalı", HttpStatus.UNAUTHORIZED),
     ACCESS_DENIED("Bu işlem için yetkiniz yok", HttpStatus.FORBIDDEN),
-    LAST_ADMIN_PROTECTED("Sistemdeki son yönetici kaydı olan kullanıcı silinemez", HttpStatus.CONFLICT),
-    USER_HAS_RECORDS("Kullanıcı kayıtlı olduğu için silinemez", HttpStatus.CONFLICT),
+    LAST_ADMIN_PROTECTED("Sistemdeki son yönetici silinemez veya yetkisi düşürülemez", HttpStatus.CONFLICT),
     CONCURRENT_UPDATE("Kayıt başka bir işlem tarafından değiştirildi, lütfen tekrar deneyin", HttpStatus.CONFLICT),
     INVALID_STATUS_TRANSITION("Sipariş durumu bu şekilde değiştirilemez", HttpStatus.CONFLICT),
     USER_HAS_ACTIVE_ORDERS("Kullanıcı aktif siparişlerine sahip olduğu için silinemez", HttpStatus.CONFLICT),
-    AUTHENTICATION_REQUIRED("Kimlik doğrulaması gerekli veya oturum süresi doldu", HttpStatus.UNAUTHORIZED);
+    AUTHENTICATION_REQUIRED("Kimlik doğrulaması gerekli veya oturum süresi doldu", HttpStatus.UNAUTHORIZED),
+    MALFORMED_REQUEST("İstek okunamadı, lütfen geçerli bir istek gönderin", HttpStatus.BAD_REQUEST),
+    METHOD_NOT_ALLOWED("Bu adres için bu HTTP metodu desteklenmiyor", HttpStatus.METHOD_NOT_ALLOWED),
+    UNSUPPORTED_MEDIA_TYPE("Desteklenmeyen içerik türü, JSON gönderin", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 
     private final String message;
     private final HttpStatus status;
@@ -28,5 +30,4 @@ public enum ErrorType {
         this.message = message;
         this.status = status;
     }
-
 }
