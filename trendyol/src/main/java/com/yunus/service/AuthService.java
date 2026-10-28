@@ -1,5 +1,6 @@
 package com.yunus.service;
 
+import com.yunus.dto.auth.LoginRequest;
 import com.yunus.dto.auth.RegisterRequest;
 import com.yunus.dto.auth.AuthResponse;
 import com.yunus.entity.User;
@@ -56,7 +57,7 @@ public class AuthService {
     }
 
 
-    public AuthResponse login(RegisterRequest request) {
+    public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );

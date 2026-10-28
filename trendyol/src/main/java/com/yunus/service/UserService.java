@@ -3,6 +3,7 @@ package com.yunus.service;
 import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.user.UserCreateRequest;
 import com.yunus.dto.user.UserResponse;
+import com.yunus.dto.user.UserUpdateRequest;
 import com.yunus.model.UserPrincipal;
 import org.springframework.data.domain.Pageable;
 
@@ -13,7 +14,7 @@ public interface UserService {
 
     UserResponse getUserById(Long id, UserPrincipal principal);
 
-    UserResponse updateUser(Long id, UserCreateRequest request);
+    UserResponse updateUser(Long id, UserUpdateRequest request);
 
     PageResponse<UserResponse> getAllUsers(Pageable pageable);
 

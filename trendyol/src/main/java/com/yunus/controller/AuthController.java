@@ -1,5 +1,6 @@
 package com.yunus.controller;
 
+import com.yunus.dto.auth.LoginRequest;
 import com.yunus.dto.auth.RegisterRequest;
 import com.yunus.dto.auth.AuthResponse;
 import com.yunus.service.AuthService;
@@ -30,7 +31,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
-            @Valid @RequestBody RegisterRequest request) {
+            @Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }

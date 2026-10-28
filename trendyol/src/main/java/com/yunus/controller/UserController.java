@@ -3,6 +3,7 @@ package com.yunus.controller;
 import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.user.UserCreateRequest;
 import com.yunus.dto.user.UserResponse;
+import com.yunus.dto.user.UserUpdateRequest;
 import com.yunus.model.UserPrincipal;
 import com.yunus.service.UserService;
 import jakarta.validation.Valid;
@@ -44,7 +45,9 @@ public class UserController {
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> updateUser(@Valid @PathVariable Long id, @RequestBody UserCreateRequest request) {
+    public ResponseEntity<UserResponse> updateUser(
+             @PathVariable Long id,
+             @Valid @RequestBody UserUpdateRequest request) {
         UserResponse response = userService.updateUser(id, request);
         return ResponseEntity.ok(response);
     }
