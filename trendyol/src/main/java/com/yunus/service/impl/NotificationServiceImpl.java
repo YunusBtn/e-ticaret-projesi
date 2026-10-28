@@ -1,5 +1,6 @@
 package com.yunus.service.impl;
 
+import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.notification.NotificationResponse;
 import com.yunus.entity.Notification;
 import com.yunus.entity.User;
@@ -11,12 +12,16 @@ import com.yunus.model.UserPrincipal;
 import com.yunus.repository.NotificationRepository;
 import com.yunus.repository.UserRepository;
 import com.yunus.service.NotificationService;
+import com.yunus.util.PageableValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -26,6 +31,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
     private final UserRepository userRepository;
+    private static final Set<String> NOTIFICATION_SORT_FIELDS = Set.of("id", "createdAt");
 
 
     @Override
@@ -47,11 +53,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<NotificationResponse> getUserNotifications(UserPrincipal principal) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(principal.getId())
-                .stream()
-                .map(notificationMapper::toResponse)
-                .toList();
+    public PageResponse<NotificationResponse> getUserNotifications(UserPrincipal principal, Pageable pageable) {
+        PageableValidator.validateSort(pageable, NOTIFICATION_SORT_FIELDS);
+        Page<NotificationResponse> page = notificationRepository
+                .findByUserId(principal.getId(), pageable)
+                .map(notificationMapper::toResponse);
+        return PageResponse.from(page);
     }
 
 

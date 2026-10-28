@@ -1,9 +1,14 @@
 package com.yunus.controller;
 
+import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.notification.NotificationResponse;
 import com.yunus.model.UserPrincipal;
 import com.yunus.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +23,10 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping("/my")
-    public ResponseEntity<List<NotificationResponse>> getMyNotifications(
-            @AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(notificationService.getUserNotifications(principal));
+    public ResponseEntity<PageResponse<NotificationResponse>> getMyNotifications(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @ParameterObject @PageableDefault(size = 10, sort= "createdAt", direction = Sort.Direction.DESC)Pageable pageable) {
+        return ResponseEntity.ok(notificationService.getUserNotifications(principal, pageable));
     }
 
 

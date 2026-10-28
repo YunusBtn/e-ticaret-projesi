@@ -12,6 +12,7 @@ public class ProductRequest {
     @Size(max = 150, message = "Ürün adı en fazla 150 karakter olabilir")
     private String name;
 
+    @NotBlank(message = "Açıklama boş olamaz")
     @Size(max = 1000, message = "Açıklama en fazla 1000 karakter olabilir")
     private String description; // zorunlu değil, bu yüzden @NotBlank yok, sadece uzunluk sınırı var
 
