@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse createUser(UserCreateRequest request) {
-        if (userRepository.existByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "e-posta adresi");
         }
         User user = userMapper.toEntity(request);

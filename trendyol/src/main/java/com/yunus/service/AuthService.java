@@ -32,7 +32,7 @@ public class AuthService {
             throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Kullanıcı adı");
         }
 
-        if (userRepository.existByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "e-posta");
         }
 
