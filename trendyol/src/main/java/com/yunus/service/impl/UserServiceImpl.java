@@ -4,6 +4,7 @@ package com.yunus.service.impl;
 import com.yunus.dto.common.PageResponse;
 import com.yunus.dto.user.UserCreateRequest;
 import com.yunus.dto.user.UserResponse;
+import com.yunus.dto.user.UserUpdateRequest;
 import com.yunus.entity.User;
 import com.yunus.enums.OrderStatus;
 import com.yunus.enums.Role;
@@ -17,6 +18,7 @@ import com.yunus.repository.UserRepository;
 import com.yunus.service.UserService;
 import com.yunus.util.PageableValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,8 +47,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse createUser(UserCreateRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new BusinessException(ErrorType.DUPLICATE_ENTRY,"Kullanıcı adı");
+        if (userRepository.existByEmail(request.getEmail())) {
+            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "e-posta adresi");
         }
         User user = userMapper.toEntity(request);
         user.setRole(request.getRole() != null ? request.getRole() : Role.USER);
@@ -84,9 +86,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse updateUser(Long id, UserCreateRequest request) {
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> userNotFound(id));
+    public UserResponse updateUser(Long id, UserUpdateRequest request) {
+        User existingUser = findActiveUserOrThrow(id);
+
+        if (userRepository.existsByUsernameAndIdNot(request.getUsername(), id)) {
+            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Kullanıcı adı");
+        }
+
+        if (userRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
+            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "e-posta adresi");
+        }
 
         boolean demoting = request.getRole() != null && request.getRole() != Role.ADMIN;
 
@@ -101,8 +110,7 @@ public class UserServiceImpl implements UserService {
             existingUser.setRole(request.getRole());
         }
 
-        User updatedUser = userRepository.save(existingUser);
-        return userMapper.toResponse(updatedUser);
+        return userMapper.toResponse(saveOrThrowDuplicate(existingUser));
     }
 
     @Override
@@ -157,5 +165,16 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> userNotFound(id));
     }
+
+
+    private User saveOrThrowDuplicate(User user) {
+        try {
+            return userRepository.saveAndFlush(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Bu kullanıcı adı veya e-posta adresi zaten kullanılıyor");
+        }
+
+    }
+
 
 }
