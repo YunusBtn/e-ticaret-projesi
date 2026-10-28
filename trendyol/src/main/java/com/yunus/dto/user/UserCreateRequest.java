@@ -10,7 +10,7 @@ import lombok.Data;
 public class UserCreateRequest {
 
     @NotBlank(message = "Kullanıcı adı boş olamaz")
-    @Size(min = 2, max = 50, message = "Kullanıcı Adı 2 ve 50 karakter arasında olmalıdır.")
+    @Size(min = 3, max = 50, message = "Kullanıcı Adı 3 ve 50 karakter arasında olmalıdır.")
     private String username;
 
     @Email(message = "Geçerli bir e-posta adresi giriniz")

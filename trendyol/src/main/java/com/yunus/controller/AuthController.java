@@ -1,9 +1,8 @@
 package com.yunus.controller;
 
-import com.yunus.dto.auth.AuthRequest;
+import com.yunus.dto.auth.RegisterRequest;
 import com.yunus.dto.auth.AuthResponse;
 import com.yunus.service.AuthService;
-import com.yunus.service.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +22,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(
-            @Valid @RequestBody AuthRequest request) {
+            @Valid @RequestBody RegisterRequest request) {
         AuthResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -31,7 +30,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
-            @Valid @RequestBody AuthRequest request) {
+            @Valid @RequestBody RegisterRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }

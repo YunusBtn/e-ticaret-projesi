@@ -1,6 +1,6 @@
 package com.yunus.service;
 
-import com.yunus.dto.auth.AuthRequest;
+import com.yunus.dto.auth.RegisterRequest;
 import com.yunus.dto.auth.AuthResponse;
 import com.yunus.entity.User;
 import com.yunus.enums.Role;
@@ -25,7 +25,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
 
-    public AuthResponse register(AuthRequest request) {
+    public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Kullanıcı adı");
         }
@@ -56,7 +56,7 @@ public class AuthService {
     }
 
 
-    public AuthResponse login(AuthRequest request) {
+    public AuthResponse login(RegisterRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
