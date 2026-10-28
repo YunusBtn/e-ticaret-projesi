@@ -9,6 +9,7 @@ import com.yunus.exception.BusinessException;
 import com.yunus.exception.ErrorType;
 import com.yunus.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,7 +32,7 @@ public class AuthService {
             throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Kullanıcı adı");
         }
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (userRepository.existByEmail(request.getEmail())) {
             throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "e-posta");
         }
 
@@ -43,8 +44,13 @@ public class AuthService {
                 .build();
 
 
-        User savedUser = userRepository.save(user);
+        User savedUser;
 
+        try {
+            savedUser = userRepository.save(user);
+        }catch (DataIntegrityViolationException e) {
+            throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Kullanıcı adı veya e-posta adresi");
+        }
         UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getUsername());
 
         String token = jwtService.generateToken(userDetails);
