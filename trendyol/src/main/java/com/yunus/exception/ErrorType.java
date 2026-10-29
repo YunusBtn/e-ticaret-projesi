@@ -21,7 +21,8 @@ public enum ErrorType {
     AUTHENTICATION_REQUIRED("Kimlik doğrulaması gerekli veya oturum süresi doldu", HttpStatus.UNAUTHORIZED),
     MALFORMED_REQUEST("İstek okunamadı, lütfen geçerli bir istek gönderin", HttpStatus.BAD_REQUEST),
     METHOD_NOT_ALLOWED("Bu adres için bu HTTP metodu desteklenmiyor", HttpStatus.METHOD_NOT_ALLOWED),
-    UNSUPPORTED_MEDIA_TYPE("Desteklenmeyen içerik türü, JSON gönderin", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    UNSUPPORTED_MEDIA_TYPE("Desteklenmeyen içerik türü, JSON gönderin", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
+    TOO_MANY_REQUESTS("Çok fazla istek, lütfen daha sonra tekrar deneyin", HttpStatus.TOO_MANY_REQUESTS);
 
     private final String message;
     private final HttpStatus status;

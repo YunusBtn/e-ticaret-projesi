@@ -76,6 +76,10 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
         <!-- Boot 4'te Flyway'i uygulama açılırken çalıştıran otomatik yapılandırma bu starter'da.
              Sadece flyway-core yazmak artık yetmiyor. Sürümü Boot yönettiği için yazmıyoruz. -->
         <dependency>
