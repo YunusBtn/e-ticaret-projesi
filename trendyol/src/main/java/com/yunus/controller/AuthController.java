@@ -1,6 +1,7 @@
 package com.yunus.controller;
 
 import com.yunus.dto.auth.LoginRequest;
+import com.yunus.dto.auth.RefreshRequest;
 import com.yunus.dto.auth.RegisterRequest;
 import com.yunus.dto.auth.AuthResponse;
 import com.yunus.service.AuthService;
@@ -34,6 +35,19 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+        return ResponseEntity.ok(authService.refresh(request));
+    }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @Valid @RequestBody RefreshRequest request) {
+        authService.logout(request);
+        return ResponseEntity.noContent().build();
     }
 
 

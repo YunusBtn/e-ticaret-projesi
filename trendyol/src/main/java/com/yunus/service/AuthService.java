@@ -89,7 +89,7 @@ public class AuthService {
 
     }
 
-    private void logout(RefreshRequest request) {
+    public void logout(RefreshRequest request) {
         refreshTokenService.logout(request.getRefreshToken());
     }
 

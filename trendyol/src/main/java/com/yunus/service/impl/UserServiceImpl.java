@@ -15,6 +15,7 @@ import com.yunus.model.UserPrincipal;
 import com.yunus.repository.NotificationRepository;
 import com.yunus.repository.OrderRepository;
 import com.yunus.repository.UserRepository;
+import com.yunus.service.RefreshTokenService;
 import com.yunus.service.UserService;
 import com.yunus.util.PageableValidator;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final NotificationRepository notificationRepository;
     private final OrderRepository orderRepository;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public UserResponse createUser(UserCreateRequest request) {
@@ -148,6 +150,7 @@ public class UserServiceImpl implements UserService {
 
 
         notificationRepository.deleteByUserId(id);
+        refreshTokenService.revokeAllForUser(id);
     }
 
     private boolean isLastAdmin(User user) {
