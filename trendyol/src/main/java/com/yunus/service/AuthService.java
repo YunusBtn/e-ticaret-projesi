@@ -1,17 +1,21 @@
 package com.yunus.service;
 
 import com.yunus.dto.auth.LoginRequest;
+import com.yunus.dto.auth.RefreshRequest;
 import com.yunus.dto.auth.RegisterRequest;
 import com.yunus.dto.auth.AuthResponse;
+import com.yunus.entity.RefreshToken;
 import com.yunus.entity.User;
 import com.yunus.enums.Role;
 import com.yunus.exception.BusinessException;
 import com.yunus.exception.ErrorType;
+import com.yunus.model.UserPrincipal;
 import com.yunus.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +29,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
+    private final RefreshTokenService refreshTokenService;
 
 
     public AuthResponse register(RegisterRequest request) {
@@ -48,36 +53,55 @@ public class AuthService {
 
         try {
             savedUser = userRepository.save(user);
-        }catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorType.DUPLICATE_ENTRY, "Kullanıcı adı veya e-posta adresi");
         }
         UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getUsername());
 
         String token = jwtService.generateToken(userDetails);
 
-        return AuthResponse.builder()
-                .token(token)
-                .username(savedUser.getUsername())
-                .message("Kayıt Başarılı")
-                .build();
+        return buildAuthResponse(savedUser, "Kayıt Başarılı");
     }
 
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
+        Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        String token = jwtService.generateToken(userDetails);
+        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+        return buildAuthResponse(principal.getUser(), "Giriş Başarılı");
 
+
+    }
+
+
+    public AuthResponse refresh(RefreshRequest request) {
+        RefreshTokenService.RotatedToken rotated = refreshTokenService.rotate(request.getRefreshToken());
+        String accessToken = jwtService.generateToken(new UserPrincipal(rotated.user()));
         return AuthResponse.builder()
-                .token(token)
-                .username(request.getUsername())
-                .message("Giriş Başarılı")
+                .token(accessToken)
+                .refreshToken(rotated.refreshToken())
+                .username(rotated.user().getUsername())
+                .message("Oturum Başarılı")
                 .build();
 
 
+    }
+
+    private void logout(RefreshRequest request) {
+        refreshTokenService.logout(request.getRefreshToken());
+    }
+
+    private AuthResponse buildAuthResponse(User user, String message) {
+        String accessToken = jwtService.generateToken(new UserPrincipal(user));
+        String refreshToken = refreshTokenService.createForLogin(user);
+        return AuthResponse.builder()
+                .token(accessToken)
+                .refreshToken(refreshToken)
+                .username(user.getUsername())
+                .message(message)
+                .build();
     }
 
 

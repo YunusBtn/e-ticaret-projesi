@@ -21,11 +21,11 @@ import java.util.Base64;
 import java.util.HexFormat;
 import java.util.UUID;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class RefreshTokenService {
+
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -34,13 +34,13 @@ public class RefreshTokenService {
     @Value("${jwt.refresh-expiration}")
     private long refreshExpirationMs;
 
-    public record RotatedToken(User user, String refreshToken) {
-    }
+    public record RotatedToken(User user, String refreshToken) {}
 
     @Transactional
     public String createForLogin(User user) {
         return issue(user, UUID.randomUUID().toString());
     }
+
 
     @Transactional(noRollbackFor = BusinessException.class)
     public RotatedToken rotate(String rawToken) {
@@ -49,29 +49,34 @@ public class RefreshTokenService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        if (token.getRevokedAt() != null || token.getExpiresAt().isBefore(now) || token.getUser().getDeletedAt() != null) {
+
+        if (token.getRevokedAt() != null
+                || token.getExpiresAt().isBefore(now)
+                || token.getUser().getDeletedAt() != null) {
             throw invalidToken();
         }
 
+
         if (refreshTokenRepository.markUsed(token.getId(), now) == 0) {
             refreshTokenRepository.revokeFamily(token.getFamilyId(), now);
-            log.warn("Refresh token yeniden kullanıldı, aile iptal edildi. user: {}", token.getUser().getId());
+            log.warn("Refresh token yeniden kullanıldı, aile iptal edildi. userId={}", token.getUser().getId());
             throw invalidToken();
         }
 
         String newRaw = issue(token.getUser(), token.getFamilyId());
         return new RotatedToken(token.getUser(), newRaw);
-
-
-
     }
 
-    private BusinessException invalidToken() {
-        return new BusinessException(ErrorType.AUTHENTICATION_REQUIRED);
+    @Transactional
+    public void logout(String rawToken) {
+        refreshTokenRepository.findByTokenHash(hash(rawToken))
+                .ifPresent(t -> refreshTokenRepository.revokeFamily(t.getFamilyId(), LocalDateTime.now()));
     }
 
-
-
+    @Transactional
+    public void revokeAllForUser(Long userId) {
+        refreshTokenRepository.revokeAllByUserId(userId, LocalDateTime.now());
+    }
 
     private String issue(User user, String familyId) {
         String raw = generateRawToken();
@@ -81,9 +86,7 @@ public class RefreshTokenService {
                 .familyId(familyId)
                 .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(refreshExpirationMs)))
                 .build();
-
         refreshTokenRepository.save(entity);
-
         return raw;
     }
 
@@ -92,7 +95,6 @@ public class RefreshTokenService {
         SECURE_RANDOM.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
-
 
     private String hash(String raw) {
         try {
@@ -103,8 +105,7 @@ public class RefreshTokenService {
         }
     }
 
-
-
-
-
+    private BusinessException invalidToken() {
+        return new BusinessException(ErrorType.AUTHENTICATION_REQUIRED);
+    }
 }
