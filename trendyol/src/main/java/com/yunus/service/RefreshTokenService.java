@@ -11,10 +11,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Base64;
+import java.util.HexFormat;
 import java.util.UUID;
-
 
 
 @Service
@@ -48,18 +53,58 @@ public class RefreshTokenService {
             throw invalidToken();
         }
 
-        if (refreshTokenRepository.markUsed(token.getId(), now) == 0 ) {
+        if (refreshTokenRepository.markUsed(token.getId(), now) == 0) {
             refreshTokenRepository.revokeFamily(token.getFamilyId(), now);
             log.warn("Refresh token yeniden kullanıldı, aile iptal edildi. user: {}", token.getUser().getId());
             throw invalidToken();
         }
 
-        return new RotatedToken(token.getUser(), issue(token.getUser(), UUID.randomUUID().toString()));
+        String newRaw = issue(token.getUser(), token.getFamilyId());
+        return new RotatedToken(token.getUser(), newRaw);
+
+
+
     }
 
     private BusinessException invalidToken() {
         return new BusinessException(ErrorType.AUTHENTICATION_REQUIRED);
     }
+
+
+
+
+    private String issue(User user, String familyId) {
+        String raw = generateRawToken();
+        RefreshToken entity = RefreshToken.builder()
+                .user(user)
+                .tokenHash(hash(raw))
+                .familyId(familyId)
+                .expiresAt(LocalDateTime.now().plus(Duration.ofMillis(refreshExpirationMs)))
+                .build();
+
+        refreshTokenRepository.save(entity);
+
+        return raw;
+    }
+
+    private String generateRawToken() {
+        byte[] bytes = new byte[32];
+        SECURE_RANDOM.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+
+    private String hash(String raw) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(raw.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 desteklenmiyor", e);
+        }
+    }
+
+
+
 
 
 }
