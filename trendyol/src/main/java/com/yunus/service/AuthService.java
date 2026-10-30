@@ -16,6 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
+    private final LoginAttemptService loginAttemptService;
 
 
     public AuthResponse register(RegisterRequest request) {
@@ -65,9 +67,22 @@ public class AuthService {
 
 
     public AuthResponse login(LoginRequest request) {
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+
+        String username = request.getUsername();
+
+        if (loginAttemptService.isBlocked(username))
+            throw new BusinessException(ErrorType.TOO_MANY_REQUESTS);
+
+        Authentication auth;
+        try {
+            auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        }catch (AuthenticationException e){
+                loginAttemptService.recordFailure(username);
+                throw e;
+        }
+
+        loginAttemptService.recordSuccess(username);
 
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
         return buildAuthResponse(principal.getUser(), "Giriş Başarılı");
