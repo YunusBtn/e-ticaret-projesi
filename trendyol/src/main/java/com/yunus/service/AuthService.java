@@ -4,7 +4,6 @@ import com.yunus.dto.auth.LoginRequest;
 import com.yunus.dto.auth.RefreshRequest;
 import com.yunus.dto.auth.RegisterRequest;
 import com.yunus.dto.auth.AuthResponse;
-import com.yunus.entity.RefreshToken;
 import com.yunus.entity.User;
 import com.yunus.enums.Role;
 import com.yunus.exception.BusinessException;
