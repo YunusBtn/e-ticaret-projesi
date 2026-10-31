@@ -33,7 +33,7 @@ public class AdminDataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         if (userRepository.existsByRole(Role.ADMIN)) {
-           log.info("Sistemde yönetici mevcut, bootstrap atandı");
+           log.info("Sistemde yönetici mevcut, bootstrap atlandı");
             return;
         }
 
