@@ -1,5 +1,6 @@
 package com.yunus.config;
 
+import com.yunus.model.UserPrincipal;
 import com.yunus.service.CustomUserDetailsService;
 import com.yunus.service.JwtService;
 import jakarta.servlet.FilterChain;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.logging.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -56,11 +58,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    if (userDetails instanceof UserPrincipal principal) {
+                        MDC.put("userId", String.valueOf(principal.getId()));
+
+                    }
                 }
 
             }
 
-        } catch (Exception e){
+        } catch (Exception e) {
             log.warn("Geçersiz JWT token: {}", e.getMessage());
             SecurityContextHolder.clearContext();
         }
