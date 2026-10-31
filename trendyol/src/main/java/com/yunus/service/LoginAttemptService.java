@@ -28,7 +28,7 @@ public class LoginAttemptService {
     //değer son başarısız denemeden itibaren hesaplanır.
     public void recordFailure(String username) {
         int count = failedAttempts.asMap().merge(username, 1, Integer::sum);
-        if (count > MAX_FAILED_ATTEMPTS) {
+        if (count == MAX_FAILED_ATTEMPTS) {
             log.warn("Giriş deneme sınırı aşıldı, kullanıcı adı geçici olarak kilitlendi : {}", username);
 
         }

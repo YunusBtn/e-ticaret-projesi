@@ -10,7 +10,6 @@ import com.yunus.mapper.ProductMapper;
 import com.yunus.repository.ProductRepository;
 import com.yunus.service.ProductService;
 import com.yunus.util.PageableValidator;
-import jakarta.persistence.Version;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -79,6 +78,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void deleteProduct(Long id) {
         Product product = findActiveProductOrThrow(id);
         product.setDeletedAt(LocalDateTime.now());
@@ -93,10 +93,9 @@ public class ProductServiceImpl implements ProductService {
 
         if (product.getStockQuantity() < quantity) {
             throw new BusinessException(ErrorType.INSUFFICIENT_STOCK,
-                    "Ürün: " + product.getName()
+                    "ürün: " + product.getName()
                             + ", mevcut: " + product.getStockQuantity()
-                            + ", istenen: " + quantity
-                            + "Sonuç : Stok yetersiz");
+                            + ", istenen: " + quantity);
         }
 
         product.setStockQuantity(product.getStockQuantity() - quantity);
