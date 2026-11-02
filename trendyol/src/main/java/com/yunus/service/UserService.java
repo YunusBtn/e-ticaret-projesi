@@ -7,8 +7,6 @@ import com.yunus.dto.user.UserUpdateRequest;
 import com.yunus.model.UserPrincipal;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
 public interface UserService {
     UserResponse createUser(UserCreateRequest request);
 
