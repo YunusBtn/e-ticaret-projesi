@@ -17,7 +17,7 @@ class IndirimHesaplayiciTest {
 
         BigDecimal sonuc = hesaplayici.uygula(tutar, 10);
 
-        assertThat(sonuc).isEqualByComparingTo("180.00");
+       assertThat(sonuc).isEqualByComparingTo("180.00");
     }
 
     @Test
