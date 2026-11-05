@@ -81,7 +81,7 @@ class SepetTest {
 
 
     @ParameterizedTest(name = "[{index}] ad=\"{0}\" -> hata fırlatır " )
-    @NullAndEmptySource
+    @NullAndEmptySource // "" - null
     @ValueSource(strings = {" ", "  "})
     void gecersizAd_hataFirlatir(String ad) {
         assertThatThrownBy(() -> sepet.ekle(ad))
