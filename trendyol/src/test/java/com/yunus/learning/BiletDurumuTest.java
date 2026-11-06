@@ -63,6 +63,8 @@ class BiletDurumuTest {
                 case ODENDI -> hedef == KULLANILDI;
                 case IPTAL, KULLANILDI -> false;
 
+
+
             };
         }
     }
