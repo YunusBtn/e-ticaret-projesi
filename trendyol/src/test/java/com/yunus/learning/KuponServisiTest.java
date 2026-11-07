@@ -51,7 +51,7 @@ class KuponServisiTest {
     }
 
     @Test
-    @DisplayName("kupon bulunamazsa hata fırlar, hiçbir şey kaydedilmez ve bildirim gitmez")
+    @DisplayName("kupon bulunamazsa hata fırlar, hiçbir şey kaydedilmez ve bildirim gitmez") // stub: Sahte nesneye cevap öğretmek(hazır cevap)
     void kuponKullan_kuponYok_hataFirlarVeYanEtkiYok() {
         when(kuponRepository.findByKod("YOK")).thenReturn(Optional.empty());
 
