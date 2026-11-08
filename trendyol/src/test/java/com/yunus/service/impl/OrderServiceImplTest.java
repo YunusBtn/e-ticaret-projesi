@@ -1,5 +1,7 @@
 package com.yunus.service.impl;
 
+import com.yunus.dto.order.OrderItemRequest;
+import com.yunus.dto.order.OrderRequest;
 import com.yunus.entity.Order;
 import com.yunus.entity.OrderItem;
 import com.yunus.entity.Product;
@@ -21,18 +23,25 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -58,6 +67,9 @@ class OrderServiceImplTest {
 
     @Mock
     ProductService productService;
+
+    @Captor
+    ArgumentCaptor<Order> orderCaptor;
 
     @InjectMocks
     OrderServiceImpl orderService;
@@ -88,6 +100,26 @@ class OrderServiceImplTest {
                 .quantity(adet)
                 .build();
         order.getOrderItems().add(kalem);
+    }
+
+    private static Product urun(Long id, String fiyat) {
+        return Product.builder()
+                .id(id)
+                .price(new BigDecimal(fiyat))
+                .build();
+    }
+
+    private static OrderItemRequest kalemIstegi(Long urunId, int adet) {
+        OrderItemRequest istek = new OrderItemRequest();
+        istek.setProductId(urunId);
+        istek.setQuantity(adet);
+        return istek;
+    }
+
+    private static OrderRequest siparisIstegi(OrderItemRequest... kalemler) {
+        OrderRequest istek = new OrderRequest();
+        istek.setItems(List.of(kalemler));
+        return istek;
     }
 
     @Nested
@@ -126,7 +158,6 @@ class OrderServiceImplTest {
                     () -> orderService.getOrderById(SIPARIS_ID, principal(BASKA_KULLANICI_ID, Role.USER)));
 
             assertThat(hata.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
-
             verifyNoInteractions(orderMapper);
         }
 
@@ -279,7 +310,9 @@ class OrderServiceImplTest {
 
             verify(productService).increaseStock(100L, 2);
             verify(productService).increaseStock(200L, 1);
+
             verify(productService, times(2)).increaseStock(anyLong(), anyInt());
+
             verify(orderMapper).toResponse(order);
         }
 
@@ -325,6 +358,79 @@ class OrderServiceImplTest {
             assertThat(hata.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
             assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
             verifyNoInteractions(productService);
+        }
+    }
+
+    @Nested
+    @DisplayName("createOrder()")
+    class CreateOrder {
+
+        @Test
+        @DisplayName("geçerli sipariş: sahip, durum, DB fiyatıyla kalemler ve toplam tutar doğru kaydedilir")
+        void gecerliSiparis_dogruKaydedilir() {
+            User sahip = kullanici(SAHIP_ID, Role.USER);
+            when(userRepository.findById(SAHIP_ID)).thenReturn(Optional.of(sahip));
+
+            when(productService.decreaseStockAndGetProduct(100L, 2)).thenReturn(urun(100L, "50.00"));
+            when(productService.decreaseStockAndGetProduct(200L, 3)).thenReturn(urun(200L, "19.99"));
+
+            Order kaydedilmisSiparis = siparis(99L, SAHIP_ID, OrderStatus.PENDING);
+            when(orderRepository.save(any(Order.class))).thenReturn(kaydedilmisSiparis);
+
+            orderService.createOrder(
+                    siparisIstegi(kalemIstegi(100L, 2), kalemIstegi(200L, 3)),
+                    principal(SAHIP_ID, Role.USER));
+
+            verify(orderRepository).save(orderCaptor.capture());
+            Order kaydedilen = orderCaptor.getValue();
+
+            assertThat(kaydedilen.getUser()).isSameAs(sahip);
+            assertThat(kaydedilen.getStatus()).isEqualTo(OrderStatus.PENDING);
+            assertThat(kaydedilen.getTotalPrice()).isEqualByComparingTo("159.97");
+
+            assertThat(kaydedilen.getOrderItems())
+                    .extracting(kalem -> kalem.getProduct().getId(), OrderItem::getQuantity, OrderItem::getUnitPrice)
+                    .containsExactly(
+                            tuple(100L, 2, new BigDecimal("50.00")),
+                            tuple(200L, 3, new BigDecimal("19.99")));
+
+            assertThat(kaydedilen.getOrderItems())
+                    .allSatisfy(kalem -> assertThat(kalem.getOrder()).isSameAs(kaydedilen));
+
+            verify(orderMapper).toResponse(kaydedilmisSiparis);
+        }
+
+        @Test
+        @DisplayName("kullanıcı bulunamazsa 404, stoğa dokunulmaz, sipariş kaydedilmez")
+        void kullaniciYok_notFound_stokVeKayitYok() {
+            when(userRepository.findById(SAHIP_ID)).thenReturn(Optional.empty());
+            OrderRequest istek = siparisIstegi(kalemIstegi(100L, 2));
+
+            BusinessException hata = assertThrows(BusinessException.class,
+                    () -> orderService.createOrder(istek, principal(SAHIP_ID, Role.USER)));
+
+            assertThat(hata.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
+            verifyNoInteractions(productService);
+            verify(orderRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("ikinci ürünün stoğu yetersizse hata aynen iletilir ve sipariş kaydedilmez")
+        void stokYetersiz_hataIletilir_siparisKaydedilmez() {
+            when(userRepository.findById(SAHIP_ID)).thenReturn(Optional.of(kullanici(SAHIP_ID, Role.USER)));
+
+            BusinessException stokHatasi = new BusinessException(ErrorType.INSUFFICIENT_STOCK);
+            when(productService.decreaseStockAndGetProduct(100L, 2)).thenReturn(urun(100L, "50.00"));
+            when(productService.decreaseStockAndGetProduct(200L, 5)).thenThrow(stokHatasi);
+
+            OrderRequest istek = siparisIstegi(kalemIstegi(100L, 2), kalemIstegi(200L, 5));
+
+            BusinessException hata = assertThrows(BusinessException.class,
+                    () -> orderService.createOrder(istek, principal(SAHIP_ID, Role.USER)));
+            assertThat(hata).isSameAs(stokHatasi);
+
+            verify(orderRepository, never()).save(any());
+            verifyNoInteractions(orderMapper);
         }
     }
 }
