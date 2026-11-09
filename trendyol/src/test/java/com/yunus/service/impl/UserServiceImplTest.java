@@ -11,9 +11,10 @@ import com.yunus.mapper.UserMapper;                    // SAHTE (deleteUser kull
 import com.yunus.repository.NotificationRepository;    // SAHTE: bildirim tablosu
 import com.yunus.repository.OrderRepository;           // SAHTE: sipariş tablosu
 import com.yunus.repository.UserRepository;            // SAHTE: kullanıcı tablosu
-import com.yunus.service.RefreshTokenService;          // SAHTE: somut bir sınıf, Mockito onu da mocklayabilir
 
 // ---------- JUnit ----------
+import com.yunus.service.RefreshTokenService;
+import com.yunus.service.UserServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

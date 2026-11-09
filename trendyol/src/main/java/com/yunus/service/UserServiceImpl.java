@@ -1,4 +1,4 @@
-package com.yunus.service.impl;
+package com.yunus.service;
 
 
 import com.yunus.dto.common.PageResponse;
