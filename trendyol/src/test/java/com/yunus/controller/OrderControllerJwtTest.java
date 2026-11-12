@@ -1,3 +1,43 @@
+package com.yunus.controller;
+
+import com.yunus.config.RestAccessDeniedHandler;
+import com.yunus.config.RestAuthenticationEntryPoint;
+import com.yunus.config.SecurityConfig;
+import com.yunus.entity.User;
+import com.yunus.enums.Role;
+import com.yunus.model.UserPrincipal;
+import com.yunus.service.CustomUserDetailsService;
+import com.yunus.service.JwtService;
+import com.yunus.service.OrderService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @WebMvcTest(OrderController.class)
 @Import({SecurityConfig.class, RestAccessDeniedHandler.class, RestAuthenticationEntryPoint.class, JwtService.class})
 @TestPropertySource(properties = {
@@ -93,3 +133,70 @@ class OrderControllerJwtTest {
 
         verify(customUserDetailsService, never()).loadUserByUsername(any());
     }
+
+    @Test
+    @DisplayName("başka bir anahtarla imzalanmış token → 401 (imza uyuşmuyor)")
+    void yanlisAnahtarlaImzali_401() throws Exception {
+        String sahte = Jwts.builder()
+                .subject("kullanici-1")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 900_000))
+                .signWith(anahtar(BASKA_ANAHTAR))
+                .compact();
+
+        reddedilir("Bearer " + sahte);
+
+        verify(customUserDetailsService, never()).loadUserByUsername(any());
+    }
+
+    @Test
+    @DisplayName("süresi dolmuş token → 401 (imza doğru olsa bile)")
+    void suresiDolmus_401() throws Exception {
+        String eski = Jwts.builder()
+                .subject("kullanici-1")
+                .issuedAt(new Date(System.currentTimeMillis() - 2 * 60 * 60 * 1000))
+                .expiration(new Date(System.currentTimeMillis() - 60 * 60 * 1000))
+                .signWith(anahtar(TEST_SECRET))
+                .compact();
+
+        reddedilir("Bearer " + eski);
+
+        verify(customUserDetailsService, never()).loadUserByUsername(any());
+    }
+
+    @Test
+    @DisplayName("imzasız token (alg=none saldırısı) → 401")
+    void imzasizToken_401() throws Exception {
+        String imzasiz = Jwts.builder()
+                .subject("kullanici-2")
+                .expiration(new Date(System.currentTimeMillis() + 900_000))
+                .compact();
+
+        reddedilir("Bearer " + imzasiz);
+
+        verify(customUserDetailsService, never()).loadUserByUsername(any());
+    }
+
+    @Test
+    @DisplayName("token geçerli ama kullanıcı artık yok (UsernameNotFoundException) → 401")
+    void kullaniciBulunamadi_401() throws Exception {
+        String token = jwtService.generateToken(kullanici);
+        when(customUserDetailsService.loadUserByUsername("kullanici-1"))
+                .thenThrow(new UsernameNotFoundException("yok"));
+
+        reddedilir("Bearer " + token);
+
+        verify(customUserDetailsService).loadUserByUsername("kullanici-1");
+    }
+
+    @Test
+    @DisplayName("token başka bir kullanıcıya ait çıkarsa (ad uyuşmuyor) → 401")
+    void tokenKullaniciAdiUyusmuyor_401() throws Exception {
+        String token = jwtService.generateToken(kullanici);
+        UserPrincipal baskasi = new UserPrincipal(
+                User.builder().id(9L).username("baska-biri").role(Role.USER).build());
+        when(customUserDetailsService.loadUserByUsername("kullanici-1")).thenReturn(baskasi);
+
+        reddedilir("Bearer " + token);
+    }
+}
