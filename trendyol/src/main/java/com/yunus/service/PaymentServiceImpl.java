@@ -11,8 +11,6 @@ import com.yunus.exception.ErrorType;
 import com.yunus.mapper.PaymentMapper;
 import com.yunus.model.UserPrincipal;
 import com.yunus.repository.PaymentRepository;
-import com.yunus.service.OrderService;
-import com.yunus.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
