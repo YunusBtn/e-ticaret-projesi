@@ -11,7 +11,6 @@ import com.yunus.mapper.NotificationMapper;
 import com.yunus.model.UserPrincipal;
 import com.yunus.repository.NotificationRepository;
 import com.yunus.repository.UserRepository;
-import com.yunus.service.NotificationService;
 import com.yunus.util.PageableValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -9,17 +9,19 @@ import java.util.Set;
 public class PageableValidator {
 
 
-    private PageableValidator() {}
+    private PageableValidator() {
+    }
 
 
     public static void validateSort(Pageable pageable, Set<String> allowedFields) {
 
         pageable.getSort().forEach(order -> {
-            if (!allowedFields.contains(order.getProperty())){
-                throw new BusinessException(ErrorType.VALIDATION_ERROR,"Geçersiz Sıralama...");
+            if (!allowedFields.contains(order.getProperty())) {
+                throw new BusinessException(ErrorType.VALIDATION_ERROR, "Geçersiz Sıralama...");
             }
 
-        });
+        }
+        );
 
     }
 
