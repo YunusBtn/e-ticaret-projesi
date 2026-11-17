@@ -14,6 +14,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B package -Dmaven.test.skip=true \
  && java -Djarmode=tools -jar app.jar extract --layers --launcher --destination extracted
 
 
+
 FROM eclipse-temurin:21-jre-noble AS runtime
 
 RUN groupadd --system spring \
@@ -33,4 +34,3 @@ EXPOSE 8080
 
 
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-XX:+ExitOnOutOfMemoryError", "org.springframework.boot.loader.launch.JarLauncher"]
-
