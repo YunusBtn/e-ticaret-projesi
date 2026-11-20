@@ -142,7 +142,7 @@ Standart: Proje, OWASP Top 10:2025 kategorileri (özellikle Broken Access Contro
 
 Kısaca kim ne yapabilir:
 
-Herkes: kayıt olur, giriş yapar
+Herkes: kayıt olur, giriş yapar.
 USER: ürünleri görür, kendi adına sipariş verir, yalnızca kendi sipariş, ödeme ve bildirimlerine erişir
 ADMIN: ürün ve kullanıcı yönetir, tüm siparişleri görür, sipariş durumunu değiştirir
 Önemli Tasarım Kararları
@@ -168,7 +168,7 @@ bash
 
 Service katmanındaki iş kuralları JUnit 5 ve Mockito ile test edilir: stok yetersizliği, ödeme tutarı eşleşmesi, mükerrer kayıt ve yetki kuralları.
 
-Proje Yapısı
+Proje Yapısı :
 src/main/java/com/yunus
 ├── config/        Security, Swagger, JwtFilter, seeder'lar
 ├── controller/    REST uç noktaları
@@ -193,8 +193,8 @@ Proje bu sürümden sonra mikroservis mimarisine doğru ilerleyecek:
  Refresh token ve giriş denemesi sınırlama
  Gerçek ödeme sağlayıcı entegrasyonu
  OAuth2 ile sosyal giriş
-Lisans
 
+Lisans : 
 MIT lisansı ile yayınlanmıştır.
 
 Yunus Emre · Yazılım Mühendisliği · GitHub
