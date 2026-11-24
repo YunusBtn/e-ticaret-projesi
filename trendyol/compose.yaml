@@ -1,0 +1,12 @@
+name: trendyol
+
+services:
+
+  #db:postgreSQL
+
+db:
+
+  image: postgres:18
+  container_name: trendyol-db
+  environment:
+    POSTGRES_DB: trendyol

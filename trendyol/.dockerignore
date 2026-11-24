@@ -18,7 +18,7 @@ mvnw.cmd
 
 Dockerfile
 .dockerignore
-compose.yml
+compose.yaml
 compose.yaml
 
 *.log
