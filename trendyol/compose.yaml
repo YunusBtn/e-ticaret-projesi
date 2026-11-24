@@ -10,3 +10,30 @@ db:
   container_name: trendyol-db
   environment:
     POSTGRES_DB: trendyol
+
+    POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME .env içinde tanımlı değil}
+    POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD .env içinde tanımlı değil}
+    TZ: Europe/Istanbul
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+    healtcheck:
+
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+
+
+
+
+
+
+
