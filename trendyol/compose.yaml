@@ -30,6 +30,42 @@ db:
       start_period: 10s
     restart: unless-stopped
 
+  #app: Spring Uygulaması
+
+app:
+  build: .
+  image: trendyol-app:local
+  container_name: trendyol-app
+  depends_on:
+    db:
+      condition: service_healthy
+  environment:
+    SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+    SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/trendyol?currentSchema=trendyol
+    DB_USERNAME: ${DB_USERNAME:?DB_USERNAME .env içinde tanımlı değil}
+    DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD .env içinde tanımlı değil}
+    JWT_SECRET: ${JWT_SECRET:?JWT_SECRET .env içinde tanımlı değil}
+    JWT_EXPIRATION: ${JWT_EXPIRATION:-900000}
+    JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
+    ADMIN_USERNAME: ${ADMIN_USERNAME:?ADMIN_USERNAME .env içinde tanımlı değil}
+    ADMIN_EMAIL: ${ADMIN_EMAIL:?ADMIN_EMAIL .env içinde tanımlı değil}
+    ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD .env içinde tanımlı değil}
+
+    JAVA_TOOL_OPTIONS: -Duser.timezone=Europe/Istanbul
+    TZ: Europe/Istanbul
+  ports:
+
+  restart: unless-stopped
+
+volumes:
+  pgdata:
+
+
+
+
+
+
+
 
 
 
