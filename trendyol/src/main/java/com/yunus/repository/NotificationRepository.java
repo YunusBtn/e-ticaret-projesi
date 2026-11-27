@@ -5,16 +5,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
 
     Optional<Notification> findByIdAndUserId(Long id, Long userId);
-
-    List<Notification> findByUserIdOrderByCreatedAtDesc(Long userId);
-
     long countByUserIdAndIsReadFalse(Long userId);
 
     void deleteByUserId(Long userId);
